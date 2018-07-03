@@ -1,0 +1,133 @@
+<?xml version="1.0"?>
+<!--
+	Version 1.0
+	Schema for (user) preferences in xml.
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<xsd:annotation>
+		<xsd:documentation xml:lang="en">
+			Schema for Elan user and application preferences.
+			Version 1.0
+			April 2007
+			Version 1.1, January 2010
+			Added prefGroup and prefList as possible child elements of prefGroup			
+		</xsd:documentation>
+	</xsd:annotation>
+	
+	<xsd:element name="preferences">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">
+				The root element that can contain any number and any combination of single pref elements,
+				prefGroup and-or prefList elements.  
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence minOccurs="0" maxOccurs="unbounded">
+				<xsd:choice>
+					<xsd:element name="pref" type="prefType"/>
+					<xsd:element name="prefGroup" type="prefGroupType"/>
+					<xsd:element name="prefList" type="prefListType"/>
+				</xsd:choice>
+			</xsd:sequence>
+			<xsd:attribute name="version" type="xsd:string" use="optional"/>
+		</xsd:complexType>
+	</xsd:element>
+	
+	<xsd:complexType name="prefType">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">
+				Element for a single preference, with a string as the key and a value that is one 
+				of the primitive types or an Object type (string representation).
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:choice>
+			<xsd:element name="Boolean" type="booleanType"/>
+			<xsd:element name="Int" type="intType"/>
+			<xsd:element name="Long" type="longType"/>
+			<xsd:element name="Float" type="floatType"/>
+			<xsd:element name="Double" type="doubleType"/>
+			<xsd:element name="String" type="stringType"/>
+			<xsd:element name="Object" type="objectType"/>
+		</xsd:choice>
+		<xsd:attributeGroup ref="keyAtt"/>
+	</xsd:complexType>
+
+	<xsd:complexType name="prefGroupType">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">
+				Element for a group of preferences, containing any number of pref elements,
+				and that maps to a collection like Hashtable or HashMap.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence minOccurs="0" maxOccurs="unbounded">
+			<xsd:choice>
+				<xsd:element name="pref" type="prefType"/>
+				<xsd:element name="prefGroup" type="prefGroupType"/>
+				<xsd:element name="prefList" type="prefListType"/>
+			</xsd:choice>
+		</xsd:sequence>
+		<xsd:attributeGroup ref="keyAtt"/>
+	</xsd:complexType>
+
+	<xsd:complexType name="prefListType">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">
+				Element for a group of preferences, containing any number of (unnamed) primitive or
+				object elements, and that maps to a collection like ArrayList or Array.
+				To map to an array all elements should be of the same type, it is up to the client 
+				to ensure and-or check this.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence minOccurs="0" maxOccurs="unbounded">
+			<xsd:choice>
+				<xsd:element name="Boolean" type="booleanType"/>
+				<xsd:element name="Int" type="intType"/>
+				<xsd:element name="Long" type="longType"/>
+				<xsd:element name="Float" type="floatType"/>
+				<xsd:element name="Double" type="doubleType"/>
+				<xsd:element name="String" type="stringType"/>
+				<xsd:element name="Object" type="objectType"/>
+			</xsd:choice>
+		</xsd:sequence>
+		<xsd:attributeGroup ref="keyAtt"/>
+	</xsd:complexType>
+	
+	<xsd:simpleType name="booleanType">
+    	<xsd:restriction base='xsd:boolean'/>
+    </xsd:simpleType>
+	<xsd:simpleType name="intType">
+    	<xsd:restriction base='xsd:int'/>
+    </xsd:simpleType>
+    <xsd:simpleType name="longType">
+    	<xsd:restriction base='xsd:long'/>
+    </xsd:simpleType>
+    <xsd:simpleType name="floatType">
+    	<xsd:restriction base='xsd:float'/>
+    </xsd:simpleType>
+    <xsd:simpleType name="doubleType">
+    	<xsd:restriction base='xsd:double'/>
+    </xsd:simpleType>
+    <xsd:simpleType name="stringType">
+    	<xsd:restriction base='xsd:string'/>
+    </xsd:simpleType>
+
+	<xsd:complexType name="objectType">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">
+				Element for a non primitive object type. The attribute class can contain the
+				fully qualified name of the class it represents. The content is a string 
+				representation of the class, e.g. a Color could have the value "153,22,250".
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:simpleContent>
+			<xsd:extension base="xsd:string">
+				<xsd:attribute name="class" type="xsd:string" use="optional"/>
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+	
+	<xsd:attributeGroup name="keyAtt">
+		<xsd:attribute name="key" type="xsd:string" use="required"/>
+	</xsd:attributeGroup>
+	
+</xsd:schema>

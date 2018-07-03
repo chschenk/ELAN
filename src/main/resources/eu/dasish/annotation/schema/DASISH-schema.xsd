@@ -1,0 +1,372 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Copyright (C) 2013 DASISH
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+-->
+
+<xs:schema targetNamespace="http://www.dasish.eu/ns/addit"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+           xmlns:dasish="http://www.dasish.eu/ns/addit">
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace"
+               schemaLocation="http://www.w3.org/2005/08/xml.xsd"/>
+
+    <xs:complexType name="List">
+        <xs:sequence/>
+    </xs:complexType>
+    
+  
+    <xs:complexType name="ReferenceList">
+        <xs:complexContent>
+            <xs:extension base="dasish:List">
+                <xs:sequence>                    
+                    <xs:element name="href" type="xs:anyURI" minOccurs="0" maxOccurs="unbounded"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+
+    <xs:complexType name="CachedRepresentationInfo">
+        <xs:sequence>
+            <xs:element name="mimeType" type="xs:string" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="tool" type="xs:string" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="type" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="href" type="xs:anyURI" use="required"/>
+        <xs:attribute ref="xml:id" use="required"/>
+    </xs:complexType>
+
+    <!-- used in the target -->
+    <xs:complexType name="CachedRepresentationFragment">
+        <xs:sequence>
+            <xs:element name="fragmentString" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="href" type="xs:anyURI" use="required"/>
+    </xs:complexType>
+    
+    <xs:complexType name="CachedRepresentationFragmentList">
+        <xs:complexContent>
+            <xs:extension base="dasish:List">
+                <xs:sequence>
+                    <xs:element name="cached" type="dasish:CachedRepresentationFragment" minOccurs="0" maxOccurs="unbounded"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    
+
+    <xs:complexType name="Target">
+        <xs:sequence>
+            <xs:element name="lastModified" type="xs:dateTime" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="link" type="xs:anyURI" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="version" type="xs:string" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="siblingTargets" type="dasish:ReferenceList" minOccurs="1"/>
+            <xs:element name="cachedRepresentations" type="dasish:CachedRepresentationFragmentList"
+                minOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="href" type="xs:anyURI" use="required"/>
+        <xs:attribute ref="xml:id" use="required"/>
+    </xs:complexType>
+
+
+    <xs:complexType name="TargetInfo">
+        <xs:sequence>
+            <xs:element name="link" type="xs:anyURI" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="version" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        </xs:sequence>        
+        <xs:attribute name="href" type="xs:anyURI" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="TargetInfoList">
+        <xs:complexContent>
+            <xs:extension base="dasish:List">
+                <xs:sequence>
+                    <xs:element name="targetInfo" type="dasish:TargetInfo" minOccurs="0"
+                                maxOccurs="unbounded"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+
+    <xs:complexType name="Principal">
+        <xs:sequence>            
+            <xs:element name="displayName" type="xs:string" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="eMail" type="xs:string" minOccurs="1" maxOccurs="1"/>    
+        </xs:sequence>
+        <xs:attribute name="href" type="xs:anyURI" use="required"/>
+        <xs:attribute ref="xml:id" use="required"/>    
+    </xs:complexType>
+
+
+    <xs:complexType name="CurrentPrincipalInfo">
+        <xs:sequence>            
+            <xs:element name="currentPrincipal" type="xs:boolean" minOccurs="1" maxOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="href" type="xs:anyURI" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="CurrentPrincipalInfoList">
+        <xs:complexContent>
+            <xs:extension base="dasish:List">
+                <xs:sequence>
+                    <xs:element name="currentPrincipalInfo" type="dasish:CurrentPrincipalInfo" minOccurs="0"
+                                maxOccurs="unbounded"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:simpleType name="Access">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="read"/>
+            <xs:enumeration value="write"/>
+            <xs:enumeration value="none"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="Permission">
+        <xs:attribute name="principalHref" type="xs:anyURI" use="required"/>
+        <xs:attribute name="level" type="dasish:Access" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="PermissionList">
+        <xs:complexContent>
+            <xs:extension base="dasish:List">
+                <xs:sequence>
+                    <xs:element name="permission" type="dasish:Permission"
+                                minOccurs="0" maxOccurs="unbounded"/>
+                </xs:sequence>
+                <xs:attribute name="public" type="dasish:Access" use="required"/>
+            </xs:extension> 
+        </xs:complexContent>
+    </xs:complexType>
+
+
+    <xs:complexType name="Annotation">
+        <xs:sequence>            
+            <xs:element name="ownerHref" type="xs:anyURI"  minOccurs="1" maxOccurs="1"/>            
+            <xs:element name="headline" type="xs:string"  minOccurs="1" maxOccurs="1"/>
+            <xs:element name="lastModified" type="xs:dateTime"  minOccurs="1" maxOccurs="1"/>
+            <xs:element name="body" type="dasish:AnnotationBody" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="targets" type="dasish:TargetInfoList" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="permissions" type="dasish:PermissionList" minOccurs="1"
+                        maxOccurs="1"/> 
+        </xs:sequence>
+        <xs:attribute name="href" type="xs:anyURI" use="required"/>
+        <xs:attribute ref="xml:id" use="required"/>
+    </xs:complexType>
+
+
+    <xs:complexType name="AnnotationInfo">
+        <xs:sequence>
+            <xs:element name="ownerHref" type="xs:anyURI"  minOccurs="1" maxOccurs="1"/>                 
+            <xs:element name="headline" type="xs:string"  minOccurs="1" maxOccurs="1"/>
+            <xs:element name="lastModified" type="xs:dateTime"  minOccurs="1" maxOccurs="1"/>
+            <xs:element name="targets" type="dasish:ReferenceList" minOccurs="1" maxOccurs="1"
+            />
+        </xs:sequence>
+        <xs:attribute name="href" type="xs:anyURI" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="AnnotationInfoList">
+        <xs:complexContent>
+            <xs:extension base="dasish:List">
+                <xs:sequence>
+                    <xs:element name="annotationInfo" type="dasish:AnnotationInfo" minOccurs="0"
+                                maxOccurs="unbounded"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="AnnotationBody">
+        <xs:choice>
+            <xs:element name="textBody">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="mimeType" type="xs:string" minOccurs="1" maxOccurs="1"/>
+                        <xs:element name="body" type="xs:string" minOccurs="1" maxOccurs="1"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="xmlBody">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="mimeType" type="xs:string" minOccurs="1" maxOccurs="1"/>
+                        <xs:any minOccurs="1" maxOccurs="1" processContents="skip"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:choice>
+    </xs:complexType>
+
+
+    <xs:complexType name="Notebook">
+        <xs:sequence>
+            <xs:element name="ownerRef" type="xs:anyURI"  minOccurs="1" maxOccurs="1"/> 
+            <xs:element name="title" type="xs:string" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="lastModified" type="xs:dateTime" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="annotations" type="dasish:ReferenceList" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="permissions" type="dasish:PermissionList" minOccurs="1"
+                        maxOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="href" type="xs:anyURI" use="required"/>
+        <xs:attribute ref="xml:id" use="required"/>
+    </xs:complexType>
+
+
+    <xs:complexType name="NotebookInfo">
+        <xs:sequence> 
+            <xs:element name="ownerHref" type="xs:anyURI"  minOccurs="1" maxOccurs="1"/>              
+            <xs:element name="title" type="xs:string" minOccurs="1" maxOccurs="1"/>            
+        </xs:sequence>
+        <xs:attribute name="href" type="xs:anyURI" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="NotebookInfoList">
+        <xs:complexContent>
+            <xs:extension base="dasish:List">
+                <xs:sequence>
+                    <xs:element name="notebookInfo" type="dasish:NotebookInfo" minOccurs="0"
+                                maxOccurs="unbounded"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <!--- Envelopes -->
+
+    <xs:simpleType name="AnnotationActionName">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="CREATE_CACHED_REPRESENTATION"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="PermissionActionName">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="PROVIDE_PRINCIPAL_INFO"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    
+
+    <xs:complexType name="Action">
+        <xs:sequence>
+            <xs:element name="object" type="xs:anyURI" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="message" type="xs:string" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+    </xs:complexType>
+
+
+    <xs:complexType name="ActionList">
+        <xs:complexContent>
+            <xs:extension base="dasish:List">
+                <xs:sequence>
+                    <xs:element name="action" type="dasish:Action" minOccurs="0" maxOccurs="unbounded"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <!-- response envelope (not a resource, used for all response on POST/PUT requests) -->
+
+    <!-- "envelope"-->
+    <xs:complexType name="ResponseBody">
+        <xs:sequence>
+            <xs:choice>
+                <xs:element name="annotation" type="dasish:Annotation"/>
+                <xs:element name="permissions" type="dasish:PermissionList"/>
+                <xs:element name="notebook" type="dasish:Notebook"/>
+            </xs:choice>
+            <xs:element name="actionList" type="dasish:ActionList" minOccurs="1"
+                        maxOccurs="1"/>
+        </xs:sequence>
+    </xs:complexType>
+
+   
+    <!-- above: consistency check is left to "schematron":
+        it has to check if the list objects for CREATE_CACHED_REPRESENTATION(s) conisides with unresolved targets in the content element-annotation
+        the same for permission lists
+    -->
+
+
+    <!-- ############ ELEMENTS ################# !-->
+
+    <!-- complex types -->
+
+    <xs:element name="action" type="dasish:Action"/>
+    
+    <xs:element name="actionList" type="dasish:ActionList"/>
+
+    <xs:element name="annotation" type="dasish:Annotation"/>
+
+    <xs:element name="annotationBody" type="dasish:AnnotationBody"/>
+
+    <xs:element name="annotationInfo" type="dasish:AnnotationInfo"/>
+
+    <xs:element name="annotationInfoList" type="dasish:AnnotationInfoList"/>
+
+    <xs:element name="annotationList" type="dasish:ReferenceList"/>
+
+    <xs:element name="cachedRepresentationInfo" type="dasish:CachedRepresentationInfo"/>
+
+    <xs:element name="cachedRepresentationList" type="dasish:ReferenceList"/>
+    
+    <xs:element name="cachedRepresentationFragment" type="dasish:CachedRepresentationFragment"/>
+    
+    <xs:element name="cachedRepresentationFragmentList" type="dasish:CachedRepresentationFragmentList"/>
+
+    <xs:element name="list" type="dasish:List"/>
+
+    <xs:element name="notebook" type="dasish:Notebook"/>
+
+    <xs:element name="notebookInfo" type="dasish:NotebookInfo"/>
+
+    <xs:element name="notebookInfoList" type="dasish:NotebookInfoList"/>
+
+    <xs:element name="notebookList" type="dasish:ReferenceList"/>
+
+    <xs:element name="permissionList" type="dasish:PermissionList"/>
+
+    <xs:element name="responseBody" type="dasish:ResponseBody"/>
+
+    <xs:element name="target" type="dasish:Target"/>
+
+    <xs:element name="targetInfo" type="dasish:TargetInfo"/>
+
+    <xs:element name="targetInfoList" type="dasish:TargetInfoList"/>
+
+    <xs:element name="targetList" type="dasish:ReferenceList"/>
+
+    <xs:element name="principal" type="dasish:Principal"/>
+
+    <xs:element name="currentPrincipalInfo" type="dasish:CurrentPrincipalInfo"/>
+
+    <xs:element name="currentPrincipalInfoList" type="dasish:CurrentPrincipalInfoList"/>
+       
+    <xs:element name="principalList" type="dasish:ReferenceList"/>
+        
+    <xs:element name="referenceList" type="dasish:ReferenceList"/>
+    
+    <xs:element name="access" type="dasish:Access"/>
+
+    <!-- Simple types -->
+
+    <xs:element name="annotationActionName" type="dasish:AnnotationActionName"/>
+    <xs:element name="permission" type="dasish:Permission"/>
+    <xs:element name="permissionActionName" type="dasish:PermissionActionName"/>
+</xs:schema>

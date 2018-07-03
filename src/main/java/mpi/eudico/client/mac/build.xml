@@ -1,0 +1,49 @@
+<?xml version="1.0"?> 
+		
+<project name="MacApp" default="compile">
+	
+<description>
+	An ant buildscript for the Mac Application Menu handler.
+	Properties are inherited from the main MPI build script.
+	So call this build file only from the main build file.
+	When not called from another build file the following properties
+	should be specified:
+	property name="BUILDDIR" value=...
+	property name="SRCDIR"   value=...
+	property name="LIBDIR"      value=...
+</description>
+
+	<property name="SRCDIR" value="../../../../"/>
+	<property name="LIBDIR" value="../../../../"/>
+	<property name="BUILDDIR" value="../../../../"/>
+		
+<!--
+  These are the version numbers.
+-->
+<property name="new.version.macapp"         value="04"/>
+<property name="version.macapp"         value="03"/>
+
+<fileset id="set.macapp" dir="${BUILDDIR}">
+  <include name="mpi/eudico/client/mac/**.class"/>
+</fileset>
+
+<target name="compile" description="Compiles the mac specific classes">
+  <javac
+    srcdir="${SRCDIR}/mpi/eudico/client/mac"
+    destdir="${BUILDDIR}">
+  </javac>
+</target>
+
+<!--
+aug 2005: removed the signjar task. The jar should be signed separately.
+-->
+<target name="create.jar" depends="compile" description="Creates the jar">
+	<echo message="Mac jar"/>
+	<jar jarfile="${LIBDIR}/macapp__V${version.macapp}.jar">
+		<fileset refid="set.macapp"/>
+	</jar>
+	<echo message="build.xml: increase new.version.macapp now!" />
+  	<echo message="build.xml: remember to modify JNLP!"/>
+</target> 
+
+</project>

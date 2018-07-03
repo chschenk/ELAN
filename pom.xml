@@ -1,0 +1,812 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<!-- this project -->
+	<groupId>nl.mpi</groupId>
+	<artifactId>elan</artifactId>
+	<version>5.2</version>
+	<packaging>jar</packaging>
+	<name>ELAN Multimedia Annotator</name>
+	<organization>
+		<name>MPI - The Language Archive</name>
+		<url>http://tla.mpi.nl/tools/tla-tools</url>
+	</organization>
+	<description>
+		The following tasks or targets are supported:		
+		Compiling the source tree:
+		mvn compile
+		
+		Creating a jar (also copies required jar files to target/lib):
+		mvn package
+		
+		This also launches the application. For creating the jar without launching:
+		mvn package -Dexec.phase=install
+		or 
+		mvn package -P !win  (or -P -mac  or -P -linux)
+		
+		Running ELAN:
+		mvn test
+		
+		In the TLA/MPI context there is also a target for creating the source distribution:
+		mvn test -P source -P !win (or -P -mac  or -P -linux)	
+	</description>
+	<scm>
+		<developerConnection>scm:svn:https://svn.mpi.nl/LAT/elan</developerConnection>
+	</scm>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.build.sourceLevel>1.6</project.build.sourceLevel>
+		<project.build.targetLevel>1.6</project.build.targetLevel>
+		<maven.build.timestamp.format>yyyyMMdd-HHmm</maven.build.timestamp.format>
+		<nativelib.dir>nativelib</nativelib.dir>
+		<!-- for Windows and Mac, on Linux it is javax.media.jmf.linux and 2.1.1e -->
+		<jmf.id>javax.media.jmf.win</jmf.id> 
+		<jmf.version>2.1.1a</jmf.version>
+		<!-- for running ELAN before or after the package phase -->
+		<!-- integration-test with jar or prepare-package to execute without creating a jar -->
+		<exec.phase>test</exec.phase> 
+		<httpcomponents.version>4.4.1</httpcomponents.version>
+		<recognizer-api.version>4.0</recognizer-api.version>
+	</properties>
+	<!-- dependencies, jars -->
+	<dependencies>
+		<dependency>
+			<groupId>xerces</groupId>
+			<artifactId>xercesImpl</artifactId>
+			<version>2.11.0</version>
+		</dependency>
+		<dependency>
+			<groupId>xalan</groupId>
+			<artifactId>xalan</artifactId>
+			<version>2.4.1</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.help</groupId>
+			<artifactId>javahelp</artifactId>
+			<version>2.0.05</version>
+		</dependency>
+		<!-- on Windows Maven fails to add the hsqldb jar to the classpath (and it is not copied as a dependency)
+		Reason unknown so far. Maven 3.2.5, surefire-plugin 2.12.4 -->
+		<dependency>
+			<groupId>hsqldb</groupId>
+			<artifactId>hsqldb</artifactId>
+			<version>1.8.0.10</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.graphics</groupId>
+			<artifactId>jlfgr</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>uk.gate</groupId>
+			<artifactId>guk</artifactId>
+			<version>0.7</version>
+		</dependency>
+		<dependency>
+			<groupId>com.apple</groupId>
+			<artifactId>AppleJavaExtensions</artifactId>
+			<version>1.0</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.apple</groupId>
+			<artifactId>QTJava</artifactId>
+			<version>6.5.2</version>
+			<scope>compile</scope>
+		</dependency>
+		<!-- dependency for either win/mac or linux -->
+		<dependency>
+			<groupId>${jmf.id}</groupId>
+			<artifactId>jmf</artifactId>
+			<version>${jmf.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${jmf.id}</groupId>
+			<artifactId>sound</artifactId>
+			<version>${jmf.version}</version>
+		</dependency>
+		<!--
+		<dependency>
+			<groupId>javax.media.jmf.linux</groupId>
+			<artifactId>jmf</artifactId>
+			<version>2.1.1e</version>
+		</dependency>		  
+		<dependency>
+			<groupId>javax.media.jmf.linux</groupId>
+			<artifactId>sound</artifactId>
+			<version>2.1.1e</version>
+		</dependency>
+		-->
+		<dependency>
+			<groupId>nl.mpi.player.cocoa_qt</groupId>
+			<artifactId>JavaQTMovieView</artifactId>
+			<version>1.4.5</version>
+		</dependency>
+		<dependency>
+			<groupId>nl.mpi.annot.search</groupId>
+			<artifactId>mfsearch</artifactId>
+			<version>1.5.6</version>
+			<exclusions>
+        		<exclusion>
+      				<groupId>nl.mpi</groupId>
+      				<artifactId>corpusstructure-api</artifactId>
+        		</exclusion>
+        		<exclusion>
+      				<groupId>nl.mpi</groupId>
+      				<artifactId>elan4annex</artifactId>
+        		</exclusion>
+      		</exclusions>
+		</dependency>
+		<dependency>
+			<!-- This is really a dependency of mfsearch 1.5.5,
+				 and annot-search-lib 1.4.11,
+				 but this one is newer and better... -->
+			<groupId>nl.mpi.annot</groupId>
+			<artifactId>annot-tools</artifactId>
+			<version>1.1.12</version>
+			<exclusions>
+        		<exclusion>
+      				<groupId>nl.mpi</groupId>
+      				<artifactId>corpusstructure-api</artifactId>
+        		</exclusion>
+        	</exclusions>
+		</dependency>
+		<dependency>
+			<!-- This is really a dependency of mfsearch 1.5.5,
+				 but this one is newer and better... -->
+			<groupId>nl.mpi.annot.search</groupId>
+			<artifactId>annot-search-lib</artifactId>
+			<version>1.4.11</version>
+			<exclusions>
+        		<exclusion>
+      				<groupId>nl.mpi</groupId>
+      				<artifactId>corpusstructure-api</artifactId>
+        		</exclusion>
+        		<exclusion>
+					<groupId>org.apache.lucene</groupId>
+					<artifactId>lucene-core</artifactId>
+        		</exclusion>
+        		<exclusion>
+					<groupId>postgresql</groupId>
+					<artifactId>postgresql</artifactId>
+        		</exclusion>
+      		</exclusions>
+		</dependency>
+		<dependency>
+		    <groupId>nl.mpi.lexan</groupId>
+    		<artifactId>lexan-api</artifactId>
+    		<version>0.9</version>   		
+		</dependency>
+		 <dependency>
+			<groupId>nl.mpi</groupId>
+			<artifactId>lexiconcomponent</artifactId>
+			<version>1.4</version>  		
+		</dependency>
+		<!-- For the VLCJMediaPlayer -->
+		<dependency>
+			<groupId>uk.co.caprica</groupId>
+			<artifactId>vlcj</artifactId>
+			<version>2.4.1</version>
+		</dependency>
+		<dependency>
+			<groupId>net.java.dev.jna</groupId>
+			<artifactId>jna</artifactId>
+			<version>3.5.2</version>
+		</dependency>
+		<!-- for CMDI library, are dependencies of the metadata api -->
+		<!--
+		<dependency>
+	    	<groupId>org.slf4j</groupId>
+	    	<artifactId>slf4j-api</artifactId>
+	    	<version>1.7.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+	    	<artifactId>slf4j-log4j12</artifactId>
+	    	<version>1.7.5</version>
+		</dependency>
+		<dependency>
+	    	<groupId>org.apache.xmlbeans</groupId>
+	    	<artifactId>xmlbeans</artifactId>
+	    	<version>2.6.0</version>
+		</dependency>
+		<dependency>
+	    	<groupId>xml-resolver</groupId>
+	    	<artifactId>xml-resolver</artifactId>
+	    	<version>1.2</version>
+		</dependency>
+		<dependency>
+	    	<groupId>xmlunit</groupId>
+	   	 	<artifactId>xmlunit</artifactId>
+	    	<version>1.3</version>
+		</dependency>
+		-->
+		<dependency>
+			<groupId>nl.mpi</groupId>
+    		<artifactId>metadata-api</artifactId>
+    		<version>1.5.0</version>
+    		<exclusions>
+        		<exclusion><!-- this doesn't actually work since it is a dependency of xmlbeans -->
+      				<groupId>stax</groupId>
+      				<artifactId>stax-api</artifactId>
+        		</exclusion>
+        	</exclusions>
+		</dependency>
+		
+		<dependency>
+		    <groupId>org.apache.httpcomponents</groupId>
+		    <artifactId>httpcore</artifactId>
+		    <version>${httpcomponents.version}</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.apache.httpcomponents</groupId>
+		    <artifactId>httpclient</artifactId>
+		    <version>${httpcomponents.version}</version>
+		</dependency>
+		<!-- Staccato dependency -->
+		<dependency>
+  			<groupId>de.saga</groupId>
+  			<artifactId>staccato</artifactId>
+  			<version>1.0.0</version>
+		</dependency>
+		<!-- Dasish annotation schema dependency -->
+		<dependency>
+  			<groupId>eu.dasish</groupId>
+  			<artifactId>annotation-schema</artifactId>
+  			<version>1.0</version>
+		</dependency>
+
+		<!-- nl.mpi.im.gim-0.4 nl.mpi.im.lookup.CJKV-0.3, nl.mpi.im.lookup.IPA-0.4, 
+			nl.mpi.im.lookup-0.9 -->
+		<dependency>
+		    <groupId>com.atlascopco</groupId>
+		    <artifactId>hunspell-bridj</artifactId>
+		    <version>1.0.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20160212</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.5</version>
+		</dependency>
+	</dependencies>
+
+	<!-- build -->
+	<build>
+		<plugins>
+			<!-- General compiler settings (sourcelevel, targetlevel and source encoding) -->
+			<!-- default phase:compiler, goal:compile -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.0.2</version>
+				<configuration>
+					<source>${project.build.sourceLevel}</source>
+					<target>${project.build.targetLevel}</target>
+					<encoding>${project.build.sourceEncoding}</encoding>
+
+					<fork>true</fork>
+					<meminitial>128m</meminitial>
+					<maxmem>512m</maxmem>
+					<excludes>
+						<exclude>mpi/lexus/**</exclude>
+						<exclude>nl/mpi/recognizer/**</exclude>
+						<exclude>nl/mpi/recognizer/api/**</exclude>
+						<exclude>nl/mpi/recognizer/demo/**</exclude>
+					</excludes>
+					<!-- compiler arguments -->
+					<compilerArguments>
+						<verbose />
+					</compilerArguments>
+					<!-- or <compilerArgument>-verbose -bootclasspath ${java.home}\lib\rt.jar</compilerArgument> -->
+				</configuration>
+			</plugin>
+			<!-- packaging, creating a jar -->
+			<!-- default phase:package, goal:jar -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.3.1</version>
+				<executions>
+          			<execution>
+          				<id>default-jar</id>
+						<configuration>
+							<archive>
+								<index>false</index>
+								<manifest>
+									<addClasspath>true</addClasspath>
+									<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+								</manifest>
+								<manifestEntries>
+									<Built-On>${maven.build.timestamp}</Built-On>
+									<Version>${project.version}</Version>
+								</manifestEntries>
+							</archive>
+							<excludes>
+								<!-- see recognizer-jar execution: the included files there should be excluded here
+								 (they probably shouldn't be in the same "module") -->
+								 <exclude>nl/mpi/recognizer/api/**</exclude>
+								 <exclude>nl/mpi/recognizer/resources/**</exclude>
+								 <exclude>nl/mpi/test/**</exclude>
+								<exclude>${project.build.directory}/${nativelib.dir}</exclude>
+							</excludes>
+							
+						</configuration>
+					</execution>
+					<execution>
+					<!-- Create a jar containing the classes that build the Recognizer API -->
+						<id>recognizer-jar</id>
+          				<phase>package</phase>
+				        <goals>
+				        	<goal>jar</goal>
+				        </goals>
+						<configuration>
+						<finalName>recognizer-api-${recognizer-api.version}</finalName>
+			              <classifier>recognizer-api</classifier>
+			              <includes>
+			              	<include>mpi/eudico/client/annotator/recognizer/api/**</include>
+			              	<include>mpi/eudico/client/annotator/recognizer/data/**</include>
+			              </includes>
+			              <excludes>
+			              		<!-- these classes should actually be moved to a different package -->
+								<exclude>mpi/eudico/client/annotator/recognizer/api/LocalRecognizer*</exclude>
+								<exclude>mpi/eudico/client/annotator/recognizer/api/SharedRecognizer*</exclude>
+								<exclude>mpi/eudico/client/annotator/recognizer/api/RecogAvailabilityDetector*</exclude>
+								<exclude>mpi/eudico/client/annotator/recognizer/data/**Param.*</exclude>
+							</excludes>
+						</configuration>
+				    </execution>
+        		</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.2.1</version>
+				<configuration>
+					<descriptors>
+						<descriptor>
+							src/main/assembly/im.xml
+						</descriptor>
+						<descriptor>
+							src/main/assembly/elan4annex.xml
+						</descriptor>
+						<descriptor>
+							src/main/assembly/recognizer.xml
+						</descriptor>
+					</descriptors>
+				</configuration>
+				<executions>
+					<execution>
+						<id>im-assembly</id>
+						<phase>package</phase><!-- bind to the package phase -->
+						<goals>
+							<goal>single</goal><!-- only goal that is not deprecated -->
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- A plugin to copy all required jars to the target/lib/ subdirectory.
+			     (run "mvn package")
+			  -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-dependencies</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/lib</outputDirectory>
+							<overWriteReleases>false</overWriteReleases>
+							<overWriteSnapshots>false</overWriteSnapshots>
+							<overWriteIfNewer>true</overWriteIfNewer>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<profiles>
+		<!-- Windows native libraries -->
+		<profile>
+			<id>win</id>
+			<activation>
+				<os>
+					<family>Windows</family>
+				</os>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-dependency-plugin</artifactId>
+						<version>2.2</version>
+						<executions>
+							<execution>
+								<id>unpack-win</id>
+								<phase>${exec.phase}</phase>
+								<goals>
+									<goal>unpack</goal>
+								</goals>
+								<configuration>
+									<artifactItems>
+										<artifactItem>
+											<groupId>nl.mpi.player.jds</groupId>
+											<artifactId>libDSPlayer</artifactId>
+											<version>1.4</version>
+											<type>jar</type>
+											<overWrite>true</overWrite>
+											<outputDirectory>${project.build.directory}/${nativelib.dir}</outputDirectory>
+										</artifactItem>
+										<artifactItem>
+											<groupId>nl.mpi.player.jmmf</groupId>
+											<artifactId>libJMMFPlayer</artifactId>
+											<version>1.5</version>
+											<type>jar</type>
+											<overWrite>true</overWrite>
+											<outputDirectory>${project.build.directory}/${nativelib.dir}</outputDirectory>
+										</artifactItem>
+										<artifactItem>
+											<groupId>javax.media.jmf.win</groupId>
+											<artifactId>jmflib</artifactId>
+											<version>2.1.1a</version>
+											<type>jar</type>
+											<overWrite>true</overWrite>
+											<outputDirectory>${project.build.directory}/${nativelib.dir}</outputDirectory>
+										</artifactItem>
+										<artifactItem>
+											<groupId>nl.mpi.player.sendpraat.windows</groupId>
+											<artifactId>libsendpraat</artifactId>
+											<version>1.0.0</version>
+											<type>jar</type>
+											<overWrite>true</overWrite>
+											<outputDirectory>${project.build.directory}/${nativelib.dir}</outputDirectory>
+										</artifactItem>
+									</artifactItems>
+								</configuration>
+							</execution>
+							 <!-- TO DO: add execution to copy the input methods jars to e.g. a subdir of target? -->
+						</executions>
+					</plugin>
+					<!-- running the application, non-standard Maven plugin -->
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>exec-maven-plugin</artifactId>
+						<version>1.2</version>
+						<executions>
+							<execution>
+								<id>exec</id>
+								<phase>${exec.phase}</phase>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+								<configuration>
+									<executable>${java.home}\bin\java</executable> <!-- java.home must resolve to a jre directory -->
+									<arguments>								
+										<argument>-Xmx256m</argument>
+										<argument>-Dswing.aatext=true</argument>
+										<argument>-DJDSDebug=true</argument>										 
+										<argument>-DPreferredMediaFramework=JDS</argument>
+										<!-- TO DO: the input methods jars should be in the repository and the java.ext.dir property should be set -->
+										<!-- <argument>-Djava.ext.dirs=</argument> -->
+										<argument>-Djava.library.path=${java.library.path};${project.build.directory}\${nativelib.dir}</argument>										
+										<argument>-classpath</argument>
+										<classpath/>
+										<argument>mpi.eudico.client.annotator.ELAN</argument>
+									</arguments>
+									<workingDirectory>${project.build.directory}\classes</workingDirectory>
+								</configuration>
+							</execution>
+
+							<!-- unfinished; the VM arguments cannot be passed via argument elements but via MAVEN_OPTS environment variable
+							<execution>
+								<id>java</id>
+								<phase>${exec.phase}</phase>
+								<goals>
+									<goal>java</goal>
+								</goals>
+								<configuration>
+									<mainClass>mpi.eudico.client.annotator.ELAN</mainClass>
+									<arguments>
+										<argument>-Xmx256m</argument>
+										<argument>-Djava.library.path=${java.library.path};${project.build.directory}/${nativelib.dir}</argument>
+										<classpath/>
+									</arguments>
+								</configuration>
+							</execution>
+							 -->
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<!-- Mac OS X -->
+		<profile>
+			<id>mac</id>
+			<activation>
+				<os>
+					<family>mac</family>
+				</os>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-dependency-plugin</artifactId>
+						<version>2.2</version>
+						<executions>
+							<execution>
+								<id>unpack-mac</id>
+								<phase>${exec.phase}</phase>
+								<goals>
+									<goal>unpack</goal>
+								</goals>
+								<configuration>
+									<artifactItems>
+										<artifactItem>
+											<groupId>nl.mpi.player.cocoa_qt</groupId>
+											<artifactId>libJavaQTMovieView</artifactId>
+											<version>1.4.5</version>
+											<type>jar</type>
+											<overWrite>true</overWrite>
+											<outputDirectory>${project.build.directory}/${nativelib.dir}</outputDirectory>
+										</artifactItem>
+										<artifactItem>
+											<groupId>nl.mpi.player.sendpraat.mac</groupId>
+											<artifactId>libsendpraat</artifactId>
+											<version>1.0.0</version>
+											<type>jar</type>
+											<overWrite>true</overWrite>
+											<outputDirectory>${project.build.directory}/${nativelib.dir}</outputDirectory>
+										</artifactItem>
+										<artifactItem>
+											<groupId>nl.mpi.player.avf</groupId>
+											<artifactId>libAVFFrameGrabber</artifactId>
+											<version>1.0</version>
+											<type>jar</type>
+											<overWrite>true</overWrite>
+											<outputDirectory>${project.build.directory}/${nativelib.dir}</outputDirectory>
+										</artifactItem>
+									</artifactItems>
+								</configuration>
+							</execution>
+							<!-- TO DO: add execution to copy the input methods jars to e.g. a subdir of target? -->
+						</executions>
+					</plugin>
+					<!-- running the application, non-standard Maven plugin -->
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>exec-maven-plugin</artifactId>
+						<version>1.2</version>
+						<executions>
+							<execution>
+								<id>exec</id>
+								<phase>${exec.phase}</phase>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+								<configuration>
+									<executable>java</executable> <!-- or ${java.home}\bin\java, where java.home must resolve to a jre directory -->
+									<arguments>								
+										<argument>-Xmx256m</argument>
+										<argument>-Xdock:name=ELAN ${project.version}</argument>
+										<argument>-Dcom.apple.hwaccel=false</argument>
+										<!-- <argument>-Dcom.apple.eawt.CocoaComponent.CompatibilityMode=false</argument> -->
+										<argument>-DQTNoSleepTime=true</argument>
+										<!-- <argument>-DuseBufferedImage=true</argument> -->
+										<argument>-Dswing.aatext=true</argument>
+										<argument>-DPreferredMediaFramework=CocoaQT</argument>
+										<!-- <argument>-DLexanPluginDir=/Users/Shared/MPI/ELAN_LIB/Annotyzers</argument> -->
+										<!-- TO DO: the input methods jars should be in the repository and the java.ext.dir property should be set -->
+										<!-- <argument>-Djava.ext.dirs=</argument> -->
+										<argument>-Djava.library.path=${project.build.directory}/${nativelib.dir}</argument>										
+										<argument>-classpath</argument>
+										<classpath/>
+										<argument>mpi.eudico.client.annotator.ELAN</argument>
+									</arguments>
+									<workingDirectory>${project.build.directory}/classes</workingDirectory>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<!-- Linux -->
+		<profile>
+			<id>linux</id>
+			<activation>
+				<os>
+					<family>unix</family>
+					<name>linux</name>
+				</os>
+			</activation>
+			<properties>
+				<jmf.id>javax.media.jmf.linux</jmf.id>
+				<jmf.version>2.1.1e</jmf.version>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-dependency-plugin</artifactId>
+						<version>2.2</version>
+						<executions>
+							<execution>
+								<id>unpack-linux</id>
+								<phase>${exec.phase}</phase>
+								<goals>
+									<goal>unpack</goal>
+								</goals>
+								<configuration>
+									<artifactItems>
+										<artifactItem>
+											<groupId>javax.media.jmf.linux</groupId>
+											<artifactId>jmflib</artifactId>
+											<version>2.1.1e</version>
+											<type>jar</type>
+											<overWrite>true</overWrite>
+											<outputDirectory>${project.build.directory}/${nativelib.dir}</outputDirectory>
+										</artifactItem>
+										<artifactItem>
+											<groupId>nl.mpi.player.sendpraat.linux</groupId>
+											<artifactId>libsendpraat</artifactId>
+											<version>1.0.0</version>
+											<type>jar</type>
+											<overWrite>true</overWrite>
+											<outputDirectory>${project.build.directory}/${nativelib.dir}</outputDirectory>
+										</artifactItem>
+									</artifactItems>
+								</configuration>
+							</execution>
+							<!-- TO DO: add execution to copy the input methods jars to e.g. a subdir of target? -->
+						</executions>
+					</plugin>
+					<!-- running the application, non-standard Maven plugin -->
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>exec-maven-plugin</artifactId>
+						<version>1.2</version>
+						<executions>
+							<execution>
+								<id>exec</id>
+								<phase>${exec.phase}</phase>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+								<configuration>
+									<executable>java</executable> <!-- ${java.home}\bin\java, where java.home must resolve to a jre directory -->
+									<arguments>								
+										<argument>-Xmx256m</argument>
+										<argument>-Dswing.aatext=true</argument>
+										<argument>-DPreferredMediaFramework=JMF</argument>
+										<!-- TO DO: the input methods jars should be in the repository and the java.ext.dir property should be set -->
+										<!-- <argument>-Djava.ext.dirs=</argument> -->
+										<argument>-Djava.library.path=${java.library.path};${project.build.directory}/${nativelib.dir}</argument>										
+										<argument>-classpath</argument>
+										<classpath/>
+										<argument>mpi.eudico.client.annotator.ELAN</argument>
+									</arguments>
+									<workingDirectory>${project.build.directory}/classes</workingDirectory>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>source</id>
+			<dependencies>
+				<dependency>
+					<groupId>javax.media.jmf.win</groupId>
+					<artifactId>jmflib</artifactId>
+					<version>2.1.1a</version>
+					<scope>runtime</scope>
+				</dependency>
+				<dependency>
+					<groupId>nl.mpi.player.jds</groupId>
+					<artifactId>libDSPlayer</artifactId>
+					<version>1.4</version>
+					<scope>runtime</scope>
+				</dependency>
+				<dependency>
+					<groupId>nl.mpi.player.jmmf</groupId>
+					<artifactId>libJMMFPlayer</artifactId>
+					<version>1.5</version>
+					<scope>runtime</scope>
+				</dependency>
+				<dependency>
+					<groupId>javax.media.jmf.linux</groupId>
+					<artifactId>jmflib</artifactId>
+					<version>2.1.1e</version>
+					<scope>runtime</scope>
+				</dependency>
+				<dependency>
+					<groupId>javax.media.jmf.linux</groupId>
+					<artifactId>jmf</artifactId>
+					<version>2.1.1e</version>
+					<scope>runtime</scope>
+				</dependency>
+				<dependency>
+					<groupId>javax.media.jmf.linux</groupId>
+					<artifactId>sound</artifactId>
+					<version>2.1.1e</version>
+					<scope>runtime</scope>
+				</dependency>
+				<dependency>
+					<groupId>nl.mpi.player.cocoa_qt</groupId>
+					<artifactId>libJavaQTMovieView</artifactId>
+					<version>1.4.5</version>
+					<scope>runtime</scope>
+				</dependency>
+				<dependency>
+					<groupId>nl.mpi.player.sendpraat.windows</groupId>
+					<artifactId>libsendpraat</artifactId>
+					<version>1.0.0</version>
+					<scope>runtime</scope>
+				</dependency>
+				<dependency>
+					<groupId>nl.mpi.player.sendpraat.mac</groupId>
+					<artifactId>libsendpraat</artifactId>
+					<version>1.0.0</version>
+					<scope>runtime</scope>
+				</dependency>
+				<dependency>
+					<groupId>nl.mpi.player.sendpraat.linux</groupId>
+					<artifactId>libsendpraat</artifactId>
+					<version>1.0.0</version>
+					<scope>runtime</scope>
+			</dependency>
+			<dependency>
+				<groupId>nl.mpi.player.avf</groupId>
+				<artifactId>libAVFFrameGrabber</artifactId>
+				<version>1.0</version>
+				<scope>runtime</scope>
+			</dependency>
+			</dependencies>
+			<build>
+				<plugins>
+					<!-- create a source distribution -->
+					<!-- default phase: post-integration-test -->
+					<plugin>
+						<artifactId>maven-assembly-plugin</artifactId>
+						<version>2.2.1</version>
+						<configuration>
+							<descriptors>
+								<descriptor>
+									src/main/assembly/project.xml
+								</descriptor>
+							</descriptors>
+						</configuration>
+						<executions>
+							<execution>
+								<id>src-assembly</id>
+								<phase>test</phase><!-- bind to the test phase -->
+								<goals>
+									<goal>single</goal><!-- only goal that is not deprecated -->
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+	
+	<repositories>
+        <repository>
+            <id>MPI</id>
+            <name>MPI LAT Repository</name>
+            <url>https://lux15.mpi.nl/nexus/content/groups/public/</url>
+        </repository>
+    </repositories>
+</project>
+<!-- vim: set ts=4: -->

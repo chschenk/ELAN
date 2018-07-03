@@ -1,0 +1,56 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+  <head>
+  </head>
+  <body bgcolor="white">
+    Import/Export of Shoebox files.
+
+
+    <h3>Shoebox header information</h3>
+A shoeboxfile starts with the following line:<br>
+<tt>\_sh vN.0 MMM xxx</tt>,<br>
+where N is either 3 or 4,<br>
+MMM is a three digit number, <br>
+xxx stands for a typfile called xxx.typ. 
+<p>
+The meaning of N and MMM is unclear.<br>
+The parser ignores all information from the first line, and the user has
+to specify the location of the typfile.
+
+    <h3>Introduction of new tiers</h3>
+Three tiers have a special meaning for the parser and
+are created when a shoeboxfile is written back from 
+EUDICO for the first time. These are:
+<ol>
+<li>\eudicop --  the participant (speaker) of this shoebox block.
+<li>\eudicot0 -- the begin time of this shoebox block in seconds
+<li>\eudicot1 -- the end time of this shoebox block in seconds
+</ol>
+<br>
+
+The Datatypes for these tiers are:
+<ol>
+<li>\eudicop -- [String] 
+<li>\eudicot0 --[long] 
+<li>\eudicot1 --[long] 
+</ol>
+
+
+Example values:
+<ol>
+<li>\eudicop -- Peter
+<li>\eudicot0 --1
+<li>\eudicot0 --1.0
+<li>\eudicot1 --3.13
+</ol>
+
+It is assumed, that time-linking of shoebox formatted files 
+will be done on block level only.
+Time-linking information on annotation level is lost when saving to a shoebox file.<br>
+
+<p>
+<div align="right">MK:02/08/02</div>
+
+
+  </body>
+</html>

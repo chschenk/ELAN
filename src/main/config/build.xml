@@ -1,0 +1,243 @@
+<?xml version="1.0"?>
+
+<project name="elan" default="start">
+
+<description>
+	This build script contains targets to compile, build and start ELAN. 
+	The source tree is a section of the MPI tools source tree and contains 
+	only the files that are needed for building and running ELAN.
+	For compilation on any platform the jmf jars and QT zip/jars are needed. 
+
+	Requirements:
+	Ant 1.5 or higher
+    The following structure of the working directory is assumed.
+
+    - workdir
+        +-- build
+        +-- dist
+        +-- doc
+        +-- lib
+		+-- src
+			 +-- java/
+			      +-- mpi/
+        build.xml
+
+</description>
+<description>
+	Note June 2011: Maven is now the default build tool for ELAN, but the source 
+	distribution still contains an Ant build file.
+	May 2013: the JNIWrapper based media player has been removed and is therefore no longer 
+	part of the  distribution.
+	The input methods jars are also not in the distribution anymore, they can be downloaded 
+	separately from the ELAN download webpage.
+</description>
+<!-- properties -->
+<property name="SRCDIR"   value="src/main/java"/>
+<property name="RESOURCEDIR" value="src/main/resources"/>
+<property name="LIB"      value="lib"/>
+<property name="BUILDDIR" value="build"/>
+<property name="DOC"      value="doc"/>
+<property name="DISTDIR"  value="dist"/>
+<property name="COMPLIANCE" value="1.6"/>
+
+<!-- change to an existing .eaf file -->
+<property name="eaffile"  value="${basedir}/resources/testdata/elan/elan-example3.eaf"/>
+
+<!-- properties for jars etc. 
+     copied from the MPI ELAN build file, though this doesn't make much sense here -->
+<property name="CocoaQT_Version" value="1.4.3"/>
+<!-- property holding the current version of the Java - DirectShow player, since Dec 2010 -->
+<property name="JDS_Version" value="1.4"/>
+
+<!-- classpath -->
+<fileset id="elan.classpath" dir="${LIB}">
+  <patternset includes="*.jar"/>
+  <patternset includes="*.zip"/>
+</fileset>
+		
+<!-- targets -->
+<!-- sets the os dependent path to the JMF libraries --> 
+<target name="setJMFPath">
+  <condition property="JMFLIB" value="${LIB}/linux">
+    <os name="Linux"/>
+  </condition>
+  <condition property="JMFLIB" value="${LIB}/mac">
+  	<os family="mac"/>
+  </condition>
+  <condition property="JMFLIB" value="${LIB}/win">
+      <os family="windows"/>
+  </condition>
+</target>
+
+<!-- sets some os dependent properties (media framework, library path) -->
+<target name="os.properties">
+  <!-- media framework -->
+	<!-- for Linux the default is now VLCJ instead of JMF -->
+  <condition property="MEDIA_FRAMEWORK" value="VLCJ">
+      <os name="Linux"/>
+  </condition>
+	<condition property="MEDIA_FRAMEWORK" value="JDS">
+		<os family="windows"/>
+	</condition>
+	<!-- value="CocoaQT" -->
+  <condition property="MEDIA_FRAMEWORK" value="CocoaQT">
+    <os family="mac"/>
+  </condition>
+  <!-- java library path, contains all native libraries of the platform, and a few JMF jars -->
+  <condition property="LIB_PATH" value="${java.library.path}:${JMFLIB}">
+      <os name="Linux"/>
+  </condition> 
+  <condition property="LIB_PATH" value="${java.library.path};${JMFLIB}">
+    <os family="windows"/>  
+  </condition>
+	<condition property="LIB_PATH"
+		value="${java.library.path}:${JMFLIB}">
+		<os family="mac"/>
+	</condition>
+  <!-- Mac specific stuff -->
+  <condition property="DOCK" value="-Xdock:name=ELAN">
+    <os family="mac"/>
+  </condition>
+  <condition property="DOCK" value="-D">
+    <not>
+      <os family="mac"/>
+    </not>
+  </condition>
+  <condition property="HWACCEL" value="-Dcom.apple.hwaccel=false">
+    <os family="mac"/>
+  </condition>
+  <condition property="HWACCEL" value="-D">
+    <not>
+      <os family="mac"/>
+    </not>
+  </condition>
+</target>
+
+<!-- copies some non-java resources to the build directory -->
+	<target name="resources" description="copies resources to the build dir">
+		<mkdir dir="${BUILDDIR}"/>
+		<copy todir="${BUILDDIR}">
+			<fileset dir="${RESOURCEDIR}">
+				<include name="**/*"/>
+			</fileset>
+		</copy>
+	</target>
+
+
+<!-- compiles the java files --> 
+<target name="compile" depends="resources, setJMFPath, os.properties" description="Compiles the sources without cleaning">
+    <echo message="${java.version}"/>
+    <javac
+    srcdir="${SRCDIR}" destdir="${BUILDDIR}" 
+    verbose="no" debug="yes" deprecation="off" memoryMaximumSize="128m" fork="true" 
+		source="${COMPLIANCE}" target="${COMPLIANCE}"
+    >	
+    <classpath>
+		<fileset refid="elan.classpath"/>
+	</classpath>
+    <classpath>
+      <fileset dir="${JMFLIB}">
+         <patternset includes="*.jar"/>
+	  </fileset>
+    </classpath>
+  </javac>
+
+</target>
+
+<!-- compiles the sources and starts ELAN from the build dir. --> 
+<target name="start" depends="compile, os.properties" description="Compiles and starts ELAN">
+  <!-- echo some properties
+  <echo message="JMF path is ${JMFLIB}"/>
+  <echo message="Library path is ${LIB_PATH}"/>
+  <echo message="Framework is ${MEDIA_FRAMEWORK}"/>
+  -->
+  
+  <java classname="mpi.eudico.client.annotator.ELAN" fork="yes">
+    <!-- load an eaf file on startup
+      <arg value="${eaffile}"/>
+    -->
+    <!-- optional logging to a file; messages to System.out and System.err are captures too
+      <jvmarg value="-Djava.util.logging.config.file=elanlog.properties"/>
+    -->
+    <!-- input method extensions -->
+  	<!-- not included anymore, download from website -->
+    <!-- <jvmarg value="-Djava.ext.dirs=${LIB}/java.ext.dir;${java.ext.dirs}"/> -->
+    <!-- java library path -->
+    <jvmarg value="-Djava.library.path=${LIB_PATH}"/>
+    <!-- preferred media framework: valid values JDS, JMF, QT -->
+    <jvmarg value="-DPreferredMediaFramework=${MEDIA_FRAMEWORK}"/>
+    <!-- only functional on Mac -->
+    <jvmarg value="${DOCK}"/>
+    <jvmarg value="${HWACCEL}"/>
+    <classpath>
+     <pathelement path="${BUILDDIR}"/>
+    </classpath>
+
+    <classpath>
+		<fileset refid="elan.classpath"/>
+	</classpath>
+    <classpath>
+      <fileset dir="${JMFLIB}"/>
+    </classpath>
+  </java>
+</target>
+
+<!-- cleans the build directory -->
+<target name="clean" description="Cleans the build directory">
+  <delete includeEmptyDirs="true">
+    <fileset dir="${BUILDDIR}"/>
+  </delete>
+</target>
+
+<!-- cleans the build, the dist and the source dist directories -->
+<target name="cleanall" depends="clean" description="Cleans the build, dist and srcdist directory">
+  <delete file="${DISTDIR}/elan.jar"/>
+</target>
+
+<!-- cleans and compiles -->
+<target name="clean-compile" depends="clean, compile" description="Cleans the build directory and compiles the sources">
+</target>
+
+<!-- creates a jar in the dist dir. -->
+<target name="jar" depends="compile" description="Creates a jar in the dist directory">
+  <delete file="${DISTDIR}/elan.jar"/>
+  <jar jarfile="${DISTDIR}/elan.jar"><fileset dir="${BUILDDIR}"/></jar>
+</target>
+
+<!-- compiles the sources, creates a jar and starts ELAN from the dist dir. --> 
+<target name="jar.start" depends="jar, os.properties" description="Creates a jar in the dist directory and starts ELAN">
+  <!-- echo some properties 
+  <echo message="JMF path is ${JMFLIB}"/>
+  <echo message="Library path is ${LIB_PATH}"/>
+  <echo message="Framework is ${MEDIA_FRAMEWORK}"/>
+  -->
+  <java classname="mpi.eudico.client.annotator.ELAN" fork="yes">
+    <!-- load an eaf file on startup
+	  <arg value="${eaffile}"/>
+    -->
+    <!-- optional logging to a file; messages to System.out and System.err are captures too
+      <jvmarg value="-Djava.util.logging.config.file=elanlog.properties"/>
+    -->
+    <!-- input method extensions -->
+  	<!-- not included anymore, download from website -->
+    <!-- <jvmarg value="-Djava.ext.dirs=${LIB}/java.ext.dir;${java.ext.dirs}"/> -->
+    <!-- java library path -->
+    <jvmarg value="-Djava.library.path=${LIB_PATH}"/>
+    <!-- preferred media framework: valid values JDS, JMF, QT -->
+    <jvmarg value="-DPreferredMediaFramework=${MEDIA_FRAMEWORK}"/>
+    <!-- only functional on Mac -->
+    <jvmarg value="${DOCK}"/>
+    <jvmarg value="${HWACCEL}"/>
+    <classpath>
+     <pathelement path="${DISTDIR}/elan.jar"/>
+    </classpath>
+
+    <classpath>
+		<fileset refid="elan.classpath"/>
+	</classpath>
+    <classpath>
+      <fileset dir="${JMFLIB}"/>
+    </classpath>
+  </java>
+</target>
+</project>

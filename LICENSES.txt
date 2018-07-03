@@ -1,0 +1,42 @@
+Copyright (C) 2005-2012, The Max Planck Institute for Psycholinguistics.
+
+This file is part of ELAN.
+
+ELAN is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+ELAN is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with ELAN (LICENCE-gpl-3.0.txt). If not, see <http://www.gnu.org/licenses/>.
+
+
+ELAN uses the following libraries:
+
+Apache Xerces, a library for parsing, validating and manipulating XML documents, 
+Copyright © 1999-2011 The Apache Software Foundation, 
+Licensed under the Apache License, Version 2.0.
+
+Apache Xalan, a library that provides XSLT support,
+Copyright © 1999-2011 The Apache Software Foundation, 
+Licensed under the Apache License, Version 2.0.
+
+Batik, a Java SVG Toolkit,
+Copyright © 2000-2009 The Apache Software Foundation, 
+Licensed under the Apache License, Version 2.0.
+
+HSQLDB, (HyperSQL DataBase) a SQL relational database engine written in Java,
+Copyright (c) 2001-2010, The HSQL Development Group
+For the license (BSD based), see: http://hsqldb.org/web/hsqlLicense.html
+
+JNIWrapper/ComfyJ, a library that enables access to native libraries and components from Java code,
+Copyright (c) 2012 TeamDev Ltd. 
+Licensed under a commercial TeamDev License Agreement, see: http://www.teamdev.com/jniwrapper/licensing/
+
+GATE, A General Architecture for Text Engineering, input methods library
+Copyright © 1995-2011, The University of Sheffield
+Free software available under the GNU Lesser General Public Licence 3.0.

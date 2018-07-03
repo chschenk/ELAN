@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0 http://maven.apache.org/xsd/assembly-1.1.0.xsd">
+  <id>recognizer</id>
+  <formats>
+    <format>zip</format>
+  </formats>
+  <includeBaseDirectory>false</includeBaseDirectory>
+  <fileSets>
+    <fileSet>
+      <directory>${project.build.directory}/</directory>
+      <outputDirectory>/lib</outputDirectory>
+      <useDefaultExcludes>true</useDefaultExcludes>
+      <includes>
+      	<include>recognizer-api**.jar</include>
+      </includes>
+    </fileSet>
+    <fileSet>
+      <directory>${project.basedir}/src/main/java/nl/mpi/recognizer/demo</directory>
+      <outputDirectory>/src/main/java/nl/mpi/recognizer/demo</outputDirectory>
+      <useDefaultExcludes>true</useDefaultExcludes>
+      <includes>
+      	<include>DemoRecognizer**.java</include>
+      </includes>
+    </fileSet>
+    <fileSet>
+      <directory>${project.basedir}/src/main/java/mpi/eudico/client/annotator/recognizer/api</directory>
+      <outputDirectory>/api/mpi/eudico/client/annotator/recognizer/api</outputDirectory>
+      <useDefaultExcludes>true</useDefaultExcludes>
+      <!-- 
+      <includes>
+      	<include>**.java</include>
+      </includes>
+       -->
+	  <excludes>
+         <!-- these classes should actually be moved to a different package -->
+		<exclude>LocalRecognizer.java</exclude>
+		<exclude>SharedRecognizer.java</exclude>
+		<exclude>RecogAvailabilityDetector.java</exclude>
+	  </excludes>
+    </fileSet>
+    <fileSet>
+      <directory>${project.basedir}/src/main/java/mpi/eudico/client/annotator/recognizer/data</directory>
+      <outputDirectory>/api/mpi/eudico/client/annotator/recognizer/data</outputDirectory>
+      <useDefaultExcludes>true</useDefaultExcludes>
+      <includes>
+      	<include>**.java</include>
+      </includes>
+      <excludes>
+      	<exclude>**Param.*</exclude>
+      </excludes>
+    </fileSet>
+    <!-- copy documentation and cmdi file -->
+    <fileSet>
+      <directory>${project.basedir}/src/main/resources/nl/mpi/recognizer/api</directory>
+      <outputDirectory>/docs</outputDirectory>
+      <useDefaultExcludes>true</useDefaultExcludes>
+      <includes>
+      	<include>doc.html</include>
+      	<include>example_recognizer.cmdi</include>
+      	<include>README.pdf</include>
+      	<include>recognizer.cmdi</include>
+      </includes>
+    </fileSet>
+    <!-- copy a build script as well -->
+    <fileSet>
+      <directory>${project.basedir}/src/main/resources/nl/mpi/recognizer/api</directory>
+      <outputDirectory>/</outputDirectory>
+      <useDefaultExcludes>true</useDefaultExcludes>
+      <includes>
+      	<include>pom.xml</include>
+      </includes>
+    </fileSet>
+  </fileSets>
+</assembly>

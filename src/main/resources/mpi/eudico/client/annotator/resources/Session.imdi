@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<METATRANSCRIPT Date="2009-01-07" FormatId="IMDI 3.0.7" Originator="IMDI API" Type="SESSION" Version="0" xmlns="http://www.mpi.nl/IMDI/Schema/IMDI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mpi.nl/IMDI/Schema/IMDI ./IMDI_3.0.xsd">
+  <Session>
+    <Name>Unspecified</Name>
+    <Title/>
+    <Date>Unspecified</Date>
+    <Description LanguageId="ISO639-2:eng" Link=""/>
+
+    <MDGroup>
+      <Location>
+        <Continent Link="http://www.mpi.nl/IMDI/Schema/Continents.xml" Type="ClosedVocabulary">Unspecified</Continent>
+        <Country Link="http://www.mpi.nl/IMDI/Schema/Countries.xml" Type="ClosedVocabulary">Unspecified</Country>
+        <Region>Unspecified</Region>
+        <Address>Unspecified</Address>
+      </Location>
+      <Project>
+        <Name/>
+        <Title/>
+        <Id/>
+        <Contact>
+          <Name/>
+          <Address/>
+          <Email/>
+          <Organisation/>
+        </Contact>
+        <Description LanguageId="" Link=""/>
+      </Project>
+      <Keys>
+        <Key Name=""/>
+      </Keys>
+      <Content>
+        <Genre Link="http://www.mpi.nl/IMDI/Schema/Content-Genre.xml" Type="OpenVocabulary">Unspecified</Genre>
+        <SubGenre Link="http://www.mpi.nl/IMDI/Schema/Content-SubGenre.xml" Type="OpenVocabularyList">Unspecified</SubGenre>
+        <Task Link="http://www.mpi.nl/IMDI/Schema/Content-Task.xml" Type="OpenVocabulary"/>
+        <Modalities Link="http://www.mpi.nl/IMDI/Schema/Content-Modalities.xml" Type="OpenVocabularyList"/>
+        <Subject Link="http://www.mpi.nl/IMDI/Schema/Content-Subject.xml" Type="OpenVocabularyList"/>
+        <CommunicationContext>
+          <Interactivity Link="http://www.mpi.nl/IMDI/Schema/Content-Interactivity.xml" Type="ClosedVocabulary">Unspecified </Interactivity>
+          <PlanningType Link="http://www.mpi.nl/IMDI/Schema/Content-PlanningType.xml" Type="ClosedVocabulary">Unspecified </PlanningType>
+          <Involvement Link="http://www.mpi.nl/IMDI/Schema/Content-Involvement.xml" Type="ClosedVocabulary">Unspecified </Involvement>
+          <SocialContext Link="http://www.mpi.nl/IMDI/Schema/Content-SocialContext.xml" Type="ClosedVocabulary">Unspecified </SocialContext>
+          <EventStructure Link="http://www.mpi.nl/IMDI/Schema/Content-EventStructure.xml" Type="ClosedVocabulary">Unspecified </EventStructure>
+          <Channel Link="http://www.mpi.nl/IMDI/Schema/Content-Channel.xml" Type="ClosedVocabulary">Unspecified </Channel>
+        </CommunicationContext>
+        <Languages>
+          <Description LanguageId="" Link=""/>
+          <Language>
+            <Id>Unspecified</Id>
+            <Name Link="http://www.mpi.nl/IMDI/Schema/MPI-Languages.xml" Type="OpenVocabulary">Unspecified</Name>
+            <Dominant>Unspecified</Dominant>
+            <SourceLanguage>Unspecified</SourceLanguage>
+            <TargetLanguage>Unspecified</TargetLanguage>
+            <Description LanguageId="" Link=""/>
+          </Language>
+        </Languages>
+        <Keys>
+          <Key Name=""/>
+        </Keys>
+        <Description LanguageId="" Link=""/>
+      </Content>
+      <Actors>
+        <Description LanguageId="" Link=""/>
+        <Actor>
+          <Role Link="http://www.mpi.nl/IMDI/Schema/Actor-Role.xml" Type="OpenVocabularyList">Unspecified</Role>
+          <Name/>
+          <FullName/>
+          <Code/>
+          <FamilySocialRole Link="http://www.mpi.nl/IMDI/Schema/Actor-FamilySocialRole.xml" Type="OpenVocabularyList">Unspecified</FamilySocialRole>
+          <Languages>
+            <Description LanguageId="" Link=""/>
+            <Language>
+            	<Id>Unspecified</Id>
+              <Name Link="http://www.mpi.nl/IMDI/Schema/MPI-Languages.xml" Type="OpenVocabulary">Unspecified</Name>
+              <MotherTongue>Unspecified</MotherTongue>
+              <PrimaryLanguage>Unspecified</PrimaryLanguage>
+              <Description LanguageId="" Link=""/>
+            </Language>
+          </Languages>
+          <EthnicGroup/>
+          <Age>Unspecified</Age>
+          <BirthDate>Unspecified</BirthDate>
+          <Sex Link="http://www.mpi.nl/IMDI/Schema/Actor-Sex.xml" Type="ClosedVocabulary">Unspecified</Sex>
+          <Education>Unspecified</Education>
+          <Anonymized>Unspecified</Anonymized>
+          <Contact>
+            <Name/>
+            <Address/>
+            <Email/>
+            <Organisation/>
+          </Contact>
+          <Keys>
+            <Key Name=""/>
+          </Keys>
+          <Description LanguageId="" Link=""/>
+        </Actor>
+      </Actors>
+
+    </MDGroup>
+    <Resources>
+
+      <MediaFile>
+        <ResourceLink/>
+        <Type Link="http://www.mpi.nl/IMDI/Schema/MediaFile-Type.xml" Type="ClosedVocabulary">Unspecified</Type>
+        <Format Link="http://www.mpi.nl/IMDI/Schema/MediaFile-Format.xml" Type="OpenVocabulary">Unspecified</Format>
+        <Size/>
+        <Quality>Unspecified</Quality>
+        <RecordingConditions/>
+        <TimePosition>
+          <Start>Unspecified</Start>
+          <End>Unspecified</End>
+        </TimePosition>
+        <Access>
+          <Availability/>
+          <Date>Unspecified</Date>
+          <Owner/>
+          <Publisher/>
+          <Contact>
+            <Name/>
+            <Address/>
+            <Email/>
+            <Organisation/>
+          </Contact>
+          <Description LanguageId="" Link=""/>
+        </Access>
+        <Description LanguageId="" Link=""/>
+        <Keys>
+          <Key Name=""/>
+        </Keys>
+      </MediaFile>
+
+      <WrittenResource>
+        <ResourceLink/>
+        <MediaResourceLink/>
+        <Date>Unspecified</Date>
+        <Type Link="http://www.mpi.nl/IMDI/Schema/WrittenResource-Type.xml" Type="OpenVocabulary">Unspecified</Type>
+        <SubType Link="http://www.mpi.nl/IMDI/Schema/WrittenResource-SubType.xml" Type="OpenVocabulary">Unspecified</SubType>
+        <Format Link="http://www.mpi.nl/IMDI/Schema/WrittenResource-Format.xml" Type="OpenVocabulary">Unspecified</Format>
+        <Size/>
+        <Validation>
+          <Type Link="http://www.mpi.nl/IMDI/Schema/Validation-Type.xml" Type="ClosedVocabulary">Unspecified</Type>
+          <Methodology Link="http://www.mpi.nl/IMDI/Schema/Validation-Methodology.xml" Type="ClosedVocabulary">Unspecified</Methodology>
+          <Level>Unspecified</Level>
+          <Description LanguageId="" Link=""/>
+        </Validation>
+        <Derivation Link="http://www.mpi.nl/IMDI/Schema/WrittenResource-Derivation.xml" Type="ClosedVocabulary">Unspecified</Derivation>
+        <CharacterEncoding/>
+        <ContentEncoding/>
+        <LanguageId/>
+        <Anonymized>Unspecified</Anonymized>
+        <Access>
+          <Availability/>
+          <Date>Unspecified</Date>
+          <Owner/>
+          <Publisher/>
+          <Contact>
+            <Name/>
+            <Address/>
+            <Email/>
+            <Organisation/>
+          </Contact>
+          <Description LanguageId="" Link=""/>
+        </Access>
+        <Description LanguageId="" Link=""/>
+        <Keys>
+          <Key Name=""/>
+        </Keys>
+      </WrittenResource>
+
+      
+
+      <Source>
+        <Id/>
+        <Format Link="http://www.mpi.nl/IMDI/Schema/Source-Format.xml" Type="OpenVocabulary">Unspecified</Format>
+        <Quality>Unspecified</Quality>
+        <CounterPosition>
+          <Start>Unspecified</Start>
+          <End>Unspecified</End>
+        </CounterPosition>
+        <TimePosition>
+          <Start>Unspecified</Start>
+          <End>Unspecified</End>
+        </TimePosition>
+        <Access>
+          <Availability/>
+          <Date>Unspecified</Date>
+          <Owner/>
+          <Publisher/>
+          <Contact>
+            <Name/>
+            <Address/>
+            <Email/>
+            <Organisation/>
+          </Contact>
+          <Description LanguageId="" Link=""/>
+        </Access>
+        <Description LanguageId="" Link=""/>
+        <Keys>
+          <Key Name=""/>
+        </Keys>
+      </Source>
+
+      <Anonyms>
+        <ResourceLink/>
+        <Access>
+          <Availability/>
+          <Date>Unspecified</Date>
+          <Owner/>
+          <Publisher/>
+          <Contact>
+            <Name/>
+            <Address/>
+            <Email/>
+            <Organisation/>
+          </Contact>
+          <Description LanguageId="" Link=""/>
+        </Access>
+      </Anonyms>
+
+    </Resources>
+    <References>
+      <Description LanguageId="" Link=""/>
+    </References>
+  </Session>
+</METATRANSCRIPT>

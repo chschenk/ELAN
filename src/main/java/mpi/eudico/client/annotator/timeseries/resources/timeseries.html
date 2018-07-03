@@ -1,0 +1,177 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+
+	
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+
+	
+	
+  <title>ELAN tineseries tracks - notes</title>
+  <style>
+	body {
+    	 font-family: "Lucida Grande", Verdana, Lucida, Helvetica, Arial, sans-serif;
+		 font-size: 90%;
+    	 background-color: #FFFFFF;
+    	 color: Black;
+    	 margin: 20;
+    	 padding: 2;
+		 }
+	ul { 
+       list-style-type: square;
+	}
+	table {
+		  border: 1px solid #B0B0B0;
+	}
+	</style>
+</head>
+
+
+
+<body lang="EN-US">
+
+<div>
+
+<!-- header -->
+<p></p>
+<h3 align="center">TimeSeries Tracks</h3>
+<p></p>
+
+<p><br>
+<br>
+
+<!-- vertical ruler --->
+
+<h3>Vertical ruler</h3>
+
+<p>Painting of ruler and tracks. <br>
+A track's samples/amplitudes must be converted to an y coord. in the 
+trackpanel's coordinate system.
+The ruler's range has a min value and a max value and it has a height
+h for painting. Amplitude values of tracks are converted to an y value 
+using the h, min and max values of the ruler.
+ 
+ <pre >
+ val  coord<br>
+ max    0    -- origin (0, 0) of (translated) Graphics coordinate system<br>
+               |<br>
+               |  <font style="color: red">   .</font>  y<br>
+               |<br>
+               |<br>
+               |<br>
+ min    h    --<br>
+ </pre>  
+ 
+calculate a vertical base unit: the available height divided by the total value range<br>
+float unit = h / (max - min)<br>
+calculate an y value: the unit value times the diff between the rulers max and
+the amplitude<br>
+float y = unit * (max - ampl)<br><br>
+<table cellpadding="1">
+<th align="left">Examples:</th>
+<tr>
+       <td>ruler range</td>
+       <td>[2 - 10]</td>
+</tr>
+<tr>
+       <td>ruler height</td>
+       <td>100 pix</td>
+</tr>
+<tr>
+       <td>amplitude  of sample</td>
+       <td>[8]</td>
+</tr>
+<tr>
+       <td>unit </td>
+       <td>unit = 100 / (10 - 2) = 12.5</td>
+</tr>
+<tr>
+       <td>y</td>
+       <td>y = 12.5 * (10 - 8) = 25</td>
+</tr>
+<tr>
+       <td>&nbsp;</td>
+       <td></td>
+</tr>
+<tr>
+       <td>amplitude of sample</td>
+       <td>[13]</td>
+</tr>
+<tr>
+       <td>y</td>
+       <td>y = 12.5 * (10 - 13) = -37.5</td>
+</tr>
+</table>
+
+</p>
+
+<p><br>
+</p>
+
+<!-- august 2005 update --->
+<h3>Tracks: rate and media times</h3>
+
+<p>Conversion of sample index to a media time and to an x coordinate.<br>
+
+In contrast to the TimelineViewer and SignalViewer floats are used from the start
+for values like milliseconds per sample to avoid rounding related imprecision. <br>
+The following applies to a tracks with a fixed/continuous sample frequency. <br>
+sps: track sample frequency: number of samples per second<br> 
+msps: track millisec per sample, virtual duration per sample, or time until next sample<br>
+float sps = samplefreq<br>
+float msps = 1000 / sps<br><br>
+Sample index to time value and time value to sample index calculation.<br>
+Index is zero based (first sample is index 0). 
+Samples are treated begin time inclusive, (virtual) end time exclusive. This means that 
+all time values between index x and index x + 1, are considered to belong to sample x.<br>
+sps = 40<br>
+msps = 1000 / 40 = 25<br>
+<pre>
+0     1     2     3     4     5<br>
+|-----|-----|-----|-----|-----|<br>
+0     25    50    75   100   125<br>
+</pre>
+So, sample 0 is from time 0 - 24 ms, sample 1 from 25 - 49 ms etc.<br>
+Index i to time t:<br>
+float t = i * msps<br>
+this results in the actual (begin) time of the sample. (**see consideration below)<br>
+Time t to index i:<br>
+int i = (int)(t / msps)<br>
+rounding down results in the index of the sample in which virtual time interval 
+that includes the time value t.<br><br>
+
+**) The smallest time unit in the ELAN media world is 1 millisecond, which is a 
+long value, so non floating point. This consequence is that different samples can
+calculate to the same time value (as a result of rounding) and that a time value 
+could calculate to more than one sample index.<br>
+sps = 4410<br>
+msps = 1000 / 4410 = 0.2267...<br>
+<pre>
+0          1          2          3          4          5<br>
+|----------|----------|----------|----------|----------|<br>
+0       0.2267     0.4535     0.6802     0.9070     1.1337
+</pre>
+Index to time example: <br>
+indices 0, 1, 2, 3, 4 all return t = 0 ms<br> 
+indices 5, 6, 7, 8 return t = 1 ms<br>
+This also means that the number of samples per millisecond is not constant.<br>
+Time to index example:<br>
+time t = 0 returns index 0, t = 1 returns 4, t = 2 returns 8, which seems inconsistent.
+Rounding up would seem to be a better solutions in such case.<br>
+So, time t to index i:<br>
+int i = msps >= 1 ? (int) (t / msps) : (int) Math.ceil(t / msps)<br>
+</p>
+<p>
+In painting the tracks similar considerations go for calculations from 
+pixel to time (to sample) and from (sample to) time to pixel.<br>
+Current approach: get the millisecondsPerPixel setting, get the samples for
+all milliseconds corresponding to a pixel and calculate the average amplitude.<br>
+Calculation form pixel to ms will probably result in the first ms for that 
+pixel and from that to the first sample for that ms....Pending 
+.<br>
+.<br>  
+</p>
+</div>
+<p style="font-size:70%"><br><br>Last modified: 04 november 2005</p>
+</body>
+</html>

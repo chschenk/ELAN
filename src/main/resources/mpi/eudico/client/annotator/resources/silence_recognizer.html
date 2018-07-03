@@ -1,0 +1,41 @@
+<!DOCTYPE html SYSTEM "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>Silence Recognizer help</title>
+    </head>
+    <body style="margin: 10px 10px 10px 10px;">
+    
+            <h4>Recognizer: Silence Recognizer MPI-PL<br/>
+                Produced By: <a href="http://tla.mpi.nl">TLA, Max Planck Institute for Psycholinguistics, Nijmegen</a></h4>
+        
+        <h3>How to use the Silence Recognizer MPI-PL in ELAN</h3>
+        <b>The Silence Recognizer:</b>
+        <ul>
+            <li><b>segments a wav file into silence and non-silence chunks</b></li>
+            <li><b>works locally, there's no need to be online</b></li>
+        </ul>
+        The Silence Recognizer segments a wav file into silence and non-silence chunks on the basis of a user specified threshold. 
+        Non-silence does not necessary refer to speech, it can be any kind of sound above the background noise level.
+        <br/>
+        The user interface contains the following elements:
+        <ul>
+            <li>Files list: here the audio file can be selected that will be processed. The list contains all wav
+                files that are linked to the transcription.
+            </li>
+            <li>Silence level: provides two ways of specifying the silence/non-silence threshold:
+                <ul>
+                    <li>Select manually: provides a slider to specify the silence level in dB relative to the peak RMS (Root Mean Square). The level value is also shown as a percentage.
+                    </li>
+                    <li>Select by example: allows to add selections (either created by hand or taken from a tier) that represent silence (the background noise). The threshold is calculated based on the samples in the selections.
+                    In case of stereo wav files it is possible to add different selections per channel, the resulting segmentation will differ per channel then.</li>
+                </ul>
+            </li>
+            <li>Settings panel
+                <ul>
+                    <li>Minimal silence duration: allows to specify a minimal duration for silence segments. Shorter segments will be filtered out.</li>
+                    <li>Minimal non-silence duration: allows to specify a minimal duration for non-silence segments. Shorter segments will be filtered out.</li>
+                </ul>
+            </li>
+        </ul>
+    </body>
+</html>

@@ -1,0 +1,57 @@
+This document contains a few hints on building the Cocoa based
+Java media player's sources.
+
+The source code of the JavaQTMovieView package consists of 
+both Java and C/Obj-C files. When the package is build 2 
+products are created; a .jar file containing the Java classes 
+and a .jnilib file (dynamic library) containing the native code.
+
+The package contains an Xcode project file but it is not 
+guaranteed that it successfully builds the targets out of the box. 
+The same goes for the Ant build.xml file which is also part of 
+the package. The two project build files depend on each other.
+
+Here are some known possible problems:
+
+In the Xcode project there is a variable named Base SDK (SDKROOT
+in the project file) and the value should match one of the 
+available SDK's on the system on which the project is going 
+to be built. Anything higher than or equal to 10.6 should be fine. 
+Defaults:
+
+SDKROOT = macosx10.6;
+MACOSX_DEPLOYMENT_TARGET = 10.6;
+
+For building the Java jar file Xcode relies on Ant (if it 
+supports legacy targets at all). It is expected to be present as
+/usr/bin/ant
+
+The Ant build file expects to find a Java 1.6.0 JVM in its 
+default location.
+The Ant build creates a .h file for the native methods in 
+JavaQTMoviePlayer.class and does so every time when building. 
+The .h contains an include statement
+
+#include <jni.h>
+
+which might cause problems on newer systems/newer versions of Xcode.
+Changing it to
+
+#include <JavaVM/jni.h>
+or 
+#import <JavaVM/jni.h>
+
+can fix this. But since the .h is recreated on every build this
+manual edit is problematic. Therefore the Ant build.xml file has a 
+property for conditional creation of the .h file:
+
+<property name="create.header" value="true"/>
+
+When set to "false" the .h file is not (re-)created and the manually 
+edited version is not overwritten. Any change in (the signature of) 
+a native method requires a rebuild of the .h file.
+
+After a successful build the products in the /dist folder are:
+- libJavaQTMovieView.jnilib
+- JavaQTMovieView.jar
+

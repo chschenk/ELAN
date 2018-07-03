@@ -1,0 +1,94 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+  <title>Transcription mode</title>
+  <style>
+    h1 { font-family: "Lucida Grande", verdana, arial, helvetica, sans-serif; font-size: 18px; font-weight: bold; }
+    div.writeboardbody { font-family: "Lucida Grande", verdana, arial, helvetica, sans-serif; font-size: 10px; line-height: 16px; color: #000; }
+    div.writeboardbody h1 { font-size: 130%; margin-top: 35px; }
+    div.writeboardbody h2 { font-size: 120%; margin-top: 35px; }
+    div.writeboardbody h3 { font-size: 100%; }
+    div.writeboardbody blockquote p { font-family: monospace; font-size: 12px; line-height: 1.3em; color: #333; }
+    div.writeboardbody table { background: #dcdcdc; }
+    div.writeboardbody td { background: #fff; padding: 5px; font-size: 12px; }
+  </style>
+</head>
+
+<body bgcolor="#FFFFFF">
+
+<h1>Transcription mode</h1>
+
+<div class="writeboardbody">
+  <p>Transcription Mode is a mode designed to increase the speed and efficiency of transcription work.  The interface is keyboard-driven and minimizes UI actions. All annotations of a certain tier type are displayed in a vertical list for easy visual access. Transcription mode brings down the transcription work to the bare essentials: listen/watch, type, listen/watch, type, listen/watch, type.</p>
+<p style="padding-left: 1em;"><em>Note.</em> Transcription mode presupposes that the initial segmentation of the recording is already done. The rationale for this is that the most efficient workflow for transcribing large amounts of linguistic data is a two-step process: first segmenting the recording into turns &mdash;also attributing turns to the appropriate speaker&mdash; (this can be done in Annotation mode or in the special purpose Segmentation mode), and then transcribing and translating these turns.</p>
+<h2>1. Setting it up</h2>
+<p>If you go to Transcription mode for the first time, a Settings dialog will come up. Here you can select the thier tier types and the number of columns. Note that you select <em>tier types</em>, not individual tiers. This is because Transcription mode displays all annotations on all tiers of a certain type in a vertical column.</p>
+<p><img src="http://www.mpi.nl/corpus/html/elan/images/tm_SettingsDialog1.png" alt="Selection of tier types"/></p>
+<p>For the purposes of this description we will asssume that the user is working with a file that has six main tier types: <code>po (practical orthography)</code>, <code>dt (detailed transcript), (literal translation)</code>, <code>tf (free translation), tn (translation in lingua franca)</code>, and <code>vb (visible behaviour)</code>. Our example file contains tiers of these types for two participants, and the overall tier structure looks like this (tier names in <strong>bold</strong>, tier types in <code>courier</code>):</p>
+<p><img src="http://www.mpi.nl/corpus/html/elan/images/tierStructure.png" alt="Tier structure"/></p>
+<p>In our example, we choose the type <code>po (practical orthography)</code> as the first column. We can leave it at that if we just want to work on the transcript. Or we can display up to four columns next to the primary one &mdash; for instance the free translations and/or a literal translation and/or detailed transcript and/or translation in lingua franca.
+</p>
+<p><img src="http://www.mpi.nl/corpus/html/elan/images/tm_SettingsDialog2.png" alt="Selection of tier types"/></p>
+<p>For  rest of the columns we can only select tier types that are time-aligned with the first using the <a href="http://www.mpi.nl/corpus/html/elan/ch05s01.html">stereotype</a> &#8220;Symbolic Assocation&#8221;. In our example, we can select <code>dt (detailed transcript)/(literal translation)</code>/ <code>tf (free translation)/ tn (translation in lingua franca</code><code>)</code> for other columns. We <em>cannot</em> choose the tier type <code>vb (visible behaviour)</code> here, because it is not time-aligned with our primary column.</p>
+<p>Having selected the tier types we want, we click &#8220;Apply&#8221;. Now the chosen tier types are displayed in vertical columns, and the two largest differences from the default Annotation mode become visible: (i) all annotations are displayed vertically (top to bottom) rather than horizontally (left to right), and (ii) columns display all annotations of a certain type. For instance, the <code>po (practical orthography)</code> column displays turns from both speakers A and B.</p>
+<p style="padding-left: 1em;"><em>Note.</em> Transcription mode presupposes that you use <a href="http://www.mpi.nl/corpus/html/elan/ch05s01.html">linguistic types</a> to differentiate the types of information in your tiers. Thus the linguistic type of your free translation tier should be different from the linguistic type of your main transcription. This is necessary for any serious corpus work anyway &#8212; for instance, ELAN&#8217;s <a href="http://www.mpi.nl/corpus/html/elan/ch07s05.html">multiple layer search</a> also relies on this. If you haven&#8217;t been using linguistic types yet, consider investing the time to bring your files up to speed. This will not only let you use Transcription mode, it will also allow complex corpus searches and in general make your data more structured. The best way to enforce proper use of linguistic types across your files is to use a <a href="http://www.mpi.nl/corpus/html/elan/ch04s02s10.html">template</a>.</p>
+<h2>2. Using Transcription mode</h2>
+<p>Transcription mode is built for high-speed transcription work. It plays automatically so that you can start typing right away. You can hit <span class="caps">TAB</span> to replay, and if you finish typing you hit <span class="caps">ENTER</span>, which brings you to the next annotation, which is played automatically so that you can start typing right away&#8230; and so on. Transcription mode boils down the transcription process to the two most essential actions: listening and typing. Once you&#8217;ve set it up, you don&#8217;t need to worry about anything else.</p>
+<p>You can use Transcription mode to do initial transcription of a segmented recording. For this you would use the simplest, one-column setup. You can also use it to work on translations if you already have transcriptions. For this you would display both tier types side by side. And of course you can do the transcription and translation work in one go. For this you would use the two-column setup and check the option to &#8220;Navigate across columns&#8221;.</p>
+<p>The basic philosophy of Transcription mode is to make things as easy as possible for the transcriber. For instance, it will silently create child annotations if they don&#8217;t exist yet. You just have to make sure the relevant tiers exist for all participants and Transcription mode takes care of the rest.</p>
+<h2>3. Essential shortcuts</h2>
+<p>Typing and playing back</p>
+<ul>
+	<li><span class="caps">ENTER</span> saves the current annotation, moves to the next annotation, and plays this new annotation if the <em>automatic playback</em> option is selected.</li>
+	<li><span class="caps">TAB</span> plays the current annotation. It acts as a play/pause key, so you can press it again to pause playback, and again to continue playing.</li>
+	<li>SHIFT+TAB plays back the current annotation from the start.</li>
+</ul>
+<p>Moving around</p>
+<ul>
+	<li>ALT+UP and <span class="caps">ALT+DOWN</span> arrows move up and down within a column.</li>
+	<li>ALT+LEFT and ALT+RIGHT arrows move left and right across columns (and just because we know you&#8217;d try this, ALT+UP and ALT+DOWN also move up and down within a column)</li>
+	<li>Remember that <span class="caps">ENTER</span> automatically moves to the next annotation. The <code>Navigate across columns</code> setting controls whether you go down within a column or you move across columns (from left to right).</li>
+</ul>
+<p>Using the mouse</p>
+<ul>
+	<li>Clicking on any annotation activates it for editing. The cursor will be placed close to where you clicked and you edit right away.</li>
+	<li>You can also use the mouse to select part of the waveform for playback. <span class="caps">TAB</span> will play/pause the selection.</li>
+	<li>Right click on annotation will give you an option to jump to the Annotation mode. This will allow you to finely manipulate annotation boundaries and then return to Transcription mode.</li>
+</ul>
+<h2>4. The settings explained</h2>
+<ul>
+	<li><em>Automatic playback of media</em>. This controls whether the annotation is automatically played or not when you arrive at it. Default: checked.</li>
+	<li><em>Show tier names</em>. This controls whether tier names are shown within the list or not. If unchecked, colour coding distinguishes different tiers/participants, and hovering over an annotation will tell you the tier/participant name. Default: checked.</li>
+	<li><em>Color only on &quot;No.&quot; column. </em>This controls whether the color coding is done only on the &quot;No.&quot; column or spread all over the other columns.  Default : unchecked.</li>
+	<li><em>Navigate across columns</em>. This controls what annotation you move to after hitting Enter. If unchecked, you move only within a column (from top to bottom). If checked, you move across columns (from left to right). Default: unchecked.</li>
+	<li><em>Scroll current annotation to center</em>. This mode keeps your current annotation always in the middle of the screen. Default: unchecked.</li>
+	<li><em>loop mode</em>. This option is found below the video signal and to the right of the play/pause buttons. When checked it means that a selected annotation while constantly loop until a new annotation is selected. Default: unchecked.</li>
+</ul>
+<h2>5. Layout and viewing</h2>
+<p>The layout of the transcription mode is designed to replicate the best aspects of a word processor and a spreadsheet &#8211; all the while allowing you access to the time-aligned video and audio signals.</p>
+<ul>
+	<li>The video column, which also includes the options and wav form, can be placed on the right or left.  Press this button <img src="http://www.mpi.nl/corpus/html/elan/images/AlignRight24.gif" alt="Video Left or Right"/> to toggle the video/settings column from left to right. The video can also be detached for viewing independent of the main window.</li>
+</ul>
+<ul>
+	<li>All of the columns are resizable: just mouse click and drag the boundaries to fit your desired widths.</li>
+</ul>
+<ul>
+	<li>You can order columns as you please. So once you have established your types you can then reorder them on the screen simply by dragging them to the desired location.</li>
+</ul>
+<!-- <p><em>[screenshot]</em></p> -->
+<ul>
+	<li>You can zoom in on the video signal in order to focus a particular part (also available in annotation mode). This works best with HD footage.</li>
+</ul>
+<ul>
+	<li>Font size of the columns is variable: you can change this in the settings dialog box.</li>
+</ul>
+<h2>6. Have (quick and easy) fun</h2>
+<p>We hope you enjoy this addition to the Elan toolset. It is designed to cut down on the many hours it takes to do detailed transcriptions and we feel that you will find it an indispensable part of your workflow.</p>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,62 @@
+ffmpeg.exe -i $in_file -ss $begin(sec.ms) -t $duration(sec.ms) $out_file
+
+# ffmpeg.exe -i $in_file -vcodec copy -acodec copy -ss $begin(sec.ms) -t $duration(sec.ms) $out_file
+# ffmbc.exe -vcodec copy -acodec copy -ss $begin(hour:min:sec.ms) -t $duration(hour:min:sec.ms) -i $in_file $out_file
+
+# Lines starting with a # (dash) are considered to be comment lines.
+#
+# This is an example media clipping configuration file for use with ELAN.
+# The configuration consists of the name of an application that can clip 
+# media files and that supports parameterized calls from the command line 
+# followed by a number of parameters for the application.
+# The actual set of parameters depends on the application of choice. 
+# But most programs will need the path to an input file, the path to an output file,
+# the begin time of the portion to clip and either the end time or the duration of 
+# the portion to clip.
+#
+# When creating a clip from within ELAN, it reads the script and fills the 
+# placeholders for the common parameters with the necessary information. 
+#
+# The first part of the script should be the name or the path to the application
+# to be used for the clipping. If only a name is used the application should be
+# known to the system, "in the path". If a path is specified it should be the 
+# absolute path to the application. If the absolute path contains white spaces the
+# path should be within double quotation marks. If the input file and output file
+# paths might contain spaces and the clipping application would need them to
+# be in quotation marks these should be added before and after the placeholders 
+# in the script.
+#
+#
+# The placeholders have this form:
+#
+# $in_file
+# $out_file
+# $begin(format)
+# $end(format)
+# $duration(format)
+#
+# where format needs to be replaced by one of the following formats:
+#
+# hour:min:sec.ms
+# hour:min:sec:fr
+# hour:min:sec:fr_NTSC
+# sec.ms
+# ms
+# fr
+# fr_NTSC
+#
+# when frames are specified PAL is assumed, for NTSC use hour:min:sec:fr_NTSC or fr_NTSC
+#
+# Examples:
+# 
+# C:\Program\ffmpeg\bin\ffmpeg.exe -i $in_file -vcodec copy -acodec copy -ss $begin(sec.ms) -t $duration(sec.ms) $out_file
+# M2-edit-cl /in:$begin(fr) /out:$end(fr) $in_file $out_file
+# 
+# Some notes on clipping with ffmpeg:
+# * the "-vcodec copy" apparently often fails to produce video, so it might be good to first try without
+#   the -vcodec and -acodec option and let ffmpeg do a best attempt
+# * when the output file already exists ffmpeg normally produces a Overwrite [y/n] prompt. This can
+#   cause ELAN to freeze in certain situations. In order to always (or never) overwrite a flag can be
+#   added to the script line: -y for overwriting, -n for not overwriting. E.g.
+# 
+# ffmpeg.exe -y -i $in_file -ss $begin(sec.ms) -t $duration(sec.ms) $out_file

@@ -1,0 +1,335 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 45;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		143CF4790F24D81D00B02B84 /* QuickTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 143CF4780F24D81D00B02B84 /* QuickTime.framework */; };
+		14913BF90F4D551B001BFC2D /* DrawingView.h in Headers */ = {isa = PBXBuildFile; fileRef = 14913BF70F4D551B001BFC2D /* DrawingView.h */; };
+		14913BFA0F4D551B001BFC2D /* DrawingView.m in Sources */ = {isa = PBXBuildFile; fileRef = 14913BF80F4D551B001BFC2D /* DrawingView.m */; };
+		14ED6C7C0F0A0A2400DDF92C /* JavaQTMovieView.h in Headers */ = {isa = PBXBuildFile; fileRef = 14ED6C7A0F0A0A2400DDF92C /* JavaQTMovieView.h */; };
+		14ED6C7D0F0A0A2400DDF92C /* JavaQTMovieView.m in Sources */ = {isa = PBXBuildFile; fileRef = 14ED6C7B0F0A0A2400DDF92C /* JavaQTMovieView.m */; };
+		14ED6CB10F0A137300DDF92C /* QTKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14ED6CB00F0A137300DDF92C /* QTKit.framework */; };
+		14ED6CE80F0A2CB300DDF92C /* JavaVM.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14ED6CE70F0A2CB300DDF92C /* JavaVM.framework */; };
+		14ED6E400F0A517400DDF92C /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14ED6E390F0A513200DDF92C /* Cocoa.framework */; };
+		226E477C18F3ECF000A078F9 /* player_JavaQTMoviePlayer.h in Headers */ = {isa = PBXBuildFile; fileRef = 226E477B18F3ECF000A078F9 /* player_JavaQTMoviePlayer.h */; };
+		33A67BB60FF205EF006FF664 /* mpeg.c in Sources */ = {isa = PBXBuildFile; fileRef = 33A67BB30FF205EF006FF664 /* mpeg.c */; };
+		33A67BB70FF205EF006FF664 /* video.c in Sources */ = {isa = PBXBuildFile; fileRef = 33A67BB40FF205EF006FF664 /* video.c */; };
+		33A67BB80FF205EF006FF664 /* video.h in Headers */ = {isa = PBXBuildFile; fileRef = 33A67BB50FF205EF006FF664 /* video.h */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		0A603A8F0B8FCE76009D4747 /* resources */ = {isa = PBXFileReference; lastKnownFileType = folder; path = resources; sourceTree = "<group>"; };
+		0A603BA90B913D5E009D4747 /* bin */ = {isa = PBXFileReference; lastKnownFileType = folder; path = bin; sourceTree = "<group>"; };
+		0A603BB00B9158B9009D4747 /* jars */ = {isa = PBXFileReference; lastKnownFileType = folder; path = jars; sourceTree = "<group>"; };
+		0AB364E40B2F671600788B6C /* src */ = {isa = PBXFileReference; lastKnownFileType = folder; path = src; sourceTree = "<group>"; };
+		0AB3653A0B2F688E00788B6C /* lib */ = {isa = PBXFileReference; lastKnownFileType = folder; path = lib; sourceTree = "<group>"; };
+		0AB3653C0B2F68A200788B6C /* dist */ = {isa = PBXFileReference; lastKnownFileType = folder; path = dist; sourceTree = "<group>"; };
+		143CF4780F24D81D00B02B84 /* QuickTime.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickTime.framework; path = /System/Library/Frameworks/QuickTime.framework; sourceTree = "<absolute>"; };
+		14913BF70F4D551B001BFC2D /* DrawingView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DrawingView.h; sourceTree = "<group>"; };
+		14913BF80F4D551B001BFC2D /* DrawingView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DrawingView.m; sourceTree = "<group>"; };
+		14ED6C7A0F0A0A2400DDF92C /* JavaQTMovieView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JavaQTMovieView.h; sourceTree = "<group>"; };
+		14ED6C7B0F0A0A2400DDF92C /* JavaQTMovieView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JavaQTMovieView.m; sourceTree = "<group>"; };
+		14ED6CB00F0A137300DDF92C /* QTKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QTKit.framework; path = /System/Library/Frameworks/QTKit.framework; sourceTree = "<absolute>"; };
+		14ED6CE70F0A2CB300DDF92C /* JavaVM.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaVM.framework; path = /System/Library/Frameworks/JavaVM.framework; sourceTree = "<absolute>"; };
+		14ED6E390F0A513200DDF92C /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
+		226E477B18F3ECF000A078F9 /* player_JavaQTMoviePlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = player_JavaQTMoviePlayer.h; sourceTree = "<group>"; };
+		33A67BB30FF205EF006FF664 /* mpeg.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mpeg.c; sourceTree = "<group>"; };
+		33A67BB40FF205EF006FF664 /* video.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = video.c; sourceTree = "<group>"; };
+		33A67BB50FF205EF006FF664 /* video.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = video.h; sourceTree = "<group>"; };
+		EB9FD8720AEECD83008E157E /* build.xml */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xml; path = build.xml; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		4CEBA78D08679EF10015D03E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				14ED6CE80F0A2CB300DDF92C /* JavaVM.framework in Frameworks */,
+				14ED6CB10F0A137300DDF92C /* QTKit.framework in Frameworks */,
+				14ED6E400F0A517400DDF92C /* Cocoa.framework in Frameworks */,
+				143CF4790F24D81D00B02B84 /* QuickTime.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		00E6828FFEC88D1A11DB9C8B = {
+			isa = PBXGroup;
+			children = (
+				226E477B18F3ECF000A078F9 /* player_JavaQTMoviePlayer.h */,
+				33A67BB30FF205EF006FF664 /* mpeg.c */,
+				33A67BB40FF205EF006FF664 /* video.c */,
+				33A67BB50FF205EF006FF664 /* video.h */,
+				143CF4780F24D81D00B02B84 /* QuickTime.framework */,
+				14ED6CE70F0A2CB300DDF92C /* JavaVM.framework */,
+				14ED6CB00F0A137300DDF92C /* QTKit.framework */,
+				14ED6C7A0F0A0A2400DDF92C /* JavaQTMovieView.h */,
+				14ED6C7B0F0A0A2400DDF92C /* JavaQTMovieView.m */,
+				14913BF70F4D551B001BFC2D /* DrawingView.h */,
+				14913BF80F4D551B001BFC2D /* DrawingView.m */,
+				EB9FD8720AEECD83008E157E /* build.xml */,
+				0AB364E40B2F671600788B6C /* src */,
+				0A603A8F0B8FCE76009D4747 /* resources */,
+				0AB3653A0B2F688E00788B6C /* lib */,
+				0A603BA90B913D5E009D4747 /* bin */,
+				0A603BB00B9158B9009D4747 /* jars */,
+				0AB3653C0B2F68A200788B6C /* dist */,
+				14ED6E390F0A513200DDF92C /* Cocoa.framework */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		4CEBA78B08679EF10015D03E /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				226E477C18F3ECF000A078F9 /* player_JavaQTMoviePlayer.h in Headers */,
+				14ED6C7C0F0A0A2400DDF92C /* JavaQTMovieView.h in Headers */,
+				14913BF90F4D551B001BFC2D /* DrawingView.h in Headers */,
+				33A67BB80FF205EF006FF664 /* video.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXLegacyTarget section */
+		EB9FD8610AEECCF5008E157E /* JavaQTMovieView */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "-emacs $(ACTION)";
+			buildConfigurationList = EB9FD8690AEECD13008E157E /* Build configuration list for PBXLegacyTarget "JavaQTMovieView" */;
+			buildPhases = (
+			);
+			buildToolPath = /usr/bin/ant;
+			dependencies = (
+			);
+			name = JavaQTMovieView;
+			passBuildSettingsInEnvironment = 1;
+			productName = AntJNIWrapper;
+		};
+/* End PBXLegacyTarget section */
+
+/* Begin PBXNativeTarget section */
+		4CEBA78E08679EF10015D03E /* JNILib */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4CEBA79108679F100015D03E /* Build configuration list for PBXNativeTarget "JNILib" */;
+			buildPhases = (
+				4CEBA78B08679EF10015D03E /* Headers */,
+				4CEBA78C08679EF10015D03E /* Sources */,
+				4CEBA78D08679EF10015D03E /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = JNILib;
+			productName = JNILibN;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		00E6828EFEC88D1A11DB9C8B /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+			};
+			buildConfigurationList = 4CEBA75C08679E4D0015D03E /* Build configuration list for PBXProject "JavaQTMovieView_64" */;
+			compatibilityVersion = "Xcode 3.1";
+			developmentRegion = English;
+			hasScannedForEncodings = 1;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 00E6828FFEC88D1A11DB9C8B;
+			productRefGroup = 00E6828FFEC88D1A11DB9C8B;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				4CEBA78E08679EF10015D03E /* JNILib */,
+				EB9FD8610AEECCF5008E157E /* JavaQTMovieView */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		4CEBA78C08679EF10015D03E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				14ED6C7D0F0A0A2400DDF92C /* JavaQTMovieView.m in Sources */,
+				14913BFA0F4D551B001BFC2D /* DrawingView.m in Sources */,
+				33A67BB60FF205EF006FF664 /* mpeg.c in Sources */,
+				33A67BB70FF205EF006FF664 /* video.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		4CEBA75D08679E4D0015D03E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ONLY_ACTIVE_ARCH = NO;
+				SDKROOT = macosx10.6;
+				ZERO_LINK = NO;
+			};
+			name = Debug;
+		};
+		4CEBA75E08679E4D0015D03E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					x86_64,
+					"$(ARCHS_STANDARD_32_64_BIT)",
+				);
+				GCC_ENABLE_OBJC_GC = unsupported;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				SDKROOT = macosx10.6;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		4CEBA79208679F100015D03E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				COPY_PHASE_STRIP = NO;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				EXECUTABLE_EXTENSION = jnilib;
+				EXECUTABLE_PREFIX = lib;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"/System/Library/Frameworks/JavaVM.framework/Headers/**",
+					"${TARGET_BUILD_DIR}/Headers/**",
+				);
+				HEADER_SEARCH_PATHS_QUOTED_1 = "\"${OBJROOT}/Headers\"";
+				HEADER_SEARCH_PATHS_QUOTED_2 = "\"$(SYSTEM_LIBRARY_DIR)/Frameworks/JavaVM.framework/Headers\"";
+				HEADER_SEARCH_PATHS_QUOTED_3 = "\"$(CONFIGURATION_BUILD_DIR)/Headers\"";
+				INSTALL_PATH = /usr/local/lib;
+				LIBRARY_STYLE = DYNAMIC;
+				MACH_O_TYPE = mh_dylib;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = antbasedjni;
+				SDKROOT = macosx10.6;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+				ZERO_LINK = NO;
+			};
+			name = Debug;
+		};
+		4CEBA79308679F100015D03E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				COPY_PHASE_STRIP = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				EXECUTABLE_EXTENSION = jnilib;
+				EXECUTABLE_PREFIX = lib;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(HEADER_SEARCH_PATHS_QUOTED_3)",
+					"$(HEADER_SEARCH_PATHS_QUOTED_4)",
+				);
+				HEADER_SEARCH_PATHS_QUOTED_1 = "\"${OBJROOT}/Headers\"";
+				HEADER_SEARCH_PATHS_QUOTED_2 = "\"$(SYSTEM_LIBRARY_DIR)/Frameworks/JavaVM.framework/Headers\"";
+				HEADER_SEARCH_PATHS_QUOTED_3 = "\"/System/Library/Frameworks/JavaVM.framework/Headers\"/**";
+				HEADER_SEARCH_PATHS_QUOTED_4 = "\"${TARGET_BUILD_DIR}/Headers\"/**";
+				INSTALL_PATH = /usr/local/lib;
+				LIBRARY_STYLE = DYNAMIC;
+				MACH_O_TYPE = mh_dylib;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = JavaQTMovieView;
+				SDKROOT = macosx10.6;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		EB9FD86A0AEECD13008E157E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = AntJNIWrapper;
+			};
+			name = Debug;
+		};
+		EB9FD86B0AEECD13008E157E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				PRODUCT_NAME = JavaQTMovieView;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		4CEBA75C08679E4D0015D03E /* Build configuration list for PBXProject "JavaQTMovieView_64" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4CEBA75D08679E4D0015D03E /* Debug */,
+				4CEBA75E08679E4D0015D03E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4CEBA79108679F100015D03E /* Build configuration list for PBXNativeTarget "JNILib" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4CEBA79208679F100015D03E /* Debug */,
+				4CEBA79308679F100015D03E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EB9FD8690AEECD13008E157E /* Build configuration list for PBXLegacyTarget "JavaQTMovieView" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EB9FD86A0AEECD13008E157E /* Debug */,
+				EB9FD86B0AEECD13008E157E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 00E6828EFEC88D1A11DB9C8B /* Project object */;
+}

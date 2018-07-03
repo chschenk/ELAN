@@ -1,0 +1,33 @@
+title: How to use Pinyin and IPA
+version: 1
+author: Markus.Kramer@mpi.nl
+audience: DOBES researchers of chinese languages
+
+section 1 Pinyin
+
+Enter the pinyin word with the keyboard.
+As you type a pinyin word, the list of possible Han symbols is shown, and the 
+pinyin word is shown underlined.
+The list shows at maximum ten Han symbols.
+Page through the list with "Page Up" and "Page Down".
+Use backspace to delete a pinyin word.
+You must not use the mouse in the lookup list.
+You leave the lookup window by deleting the pinyin word.
+If your typing would result in a word, that does not exist in the
+pinyin table, nothing happens, and the offending character is not shown.
+you navigate to a Han symbol with the up and down arrows.
+Select a Han symbol with the space key or the Enter key.
+
+
+
+
+section 2 IPA
+If you want to get an IPA character, type a keyboard character that is 
+either related phonetically or graphically to the IPA
+character. With phonetically related, we understand, that the IPA
+character is pronounced somewhat similar to a keyboard character.
+With graphically related, we understand, that the IPA character looks
+somewhat similar to a keyboard character.
+Neither method is intended to be perfect, therefore you find one and
+the same IPA character at different keyboard characters.
+
