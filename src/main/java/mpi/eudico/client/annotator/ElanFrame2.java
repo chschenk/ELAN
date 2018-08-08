@@ -15,7 +15,12 @@ import java.awt.event.ComponentListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.sql.Date;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -440,7 +445,38 @@ public class ElanFrame2 extends JFrame implements ActionListener,
 
             return;
         }
-
+        String lockFileName = fileTemp.getParent() + File.separator + "." + fileTemp.getName() + ".lock";
+        File lockFile = new File(lockFileName);
+        if (lockFile.exists())
+        {
+            String user = "";
+            String date = "";
+            String hostname = "";
+            try {
+                DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT, Locale.getDefault());
+                BufferedReader br = new BufferedReader(new FileReader(lockFile));
+                Date d = new Date(Long.decode(br.readLine())*1000);
+                date = dateFormat.format(d);
+                user = br.readLine();
+                hostname = br.readLine();
+                br.close();
+            }
+            catch (IOException ex)
+            {
+                System.err.println("Could not read existing lockfile:");
+                System.err.println(ex.getLocalizedMessage());
+            }
+            String strMessage = ElanLocale.getString("Menu.Lock.Message0");
+            strMessage += date;
+            strMessage += ElanLocale.getString("Menu.Lock.Message1");
+            strMessage += user;
+            strMessage += ElanLocale.getString("Menu.Lock.Message2");
+            strMessage += hostname;
+            strMessage += ElanLocale.getString("Menu.Lock.Message3");
+            String strError = ElanLocale.getString("Menu.Lock.Error");
+            JOptionPane.showMessageDialog(this, strMessage, strError, JOptionPane.ERROR_MESSAGE);
+            return;
+        }
         //open the eaf/etf and get the Transcription from it
         try {
             // When config files are possible check if eaf or configuration file
@@ -3246,6 +3282,8 @@ public class ElanFrame2 extends JFrame implements ActionListener,
             	layoutManager.cleanUpOnClose();	
         	}  
         	
+            transcriptionForThisFrame.unlock();
+        
             ELANCommandFactory.removeDocument(viewerManager);
             Preferences.removeDocument(transcriptionForThisFrame);
             // remove this elan frame as locale listener
@@ -3260,7 +3298,7 @@ public class ElanFrame2 extends JFrame implements ActionListener,
     	if (recentLanguagesMenuItem != null) {
 	    	recentLanguagesMenuItem.isClosing();
     	}
-
+    	
     	FrameManager.getInstance().fireWindowClosing(this, ShutdownListener.Event.WINDOW_CLOSES_LATE);
         dispose();
         System.gc();

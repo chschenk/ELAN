@@ -1,8 +1,12 @@
 package mpi.eudico.server.corpora.clomimpl.abstr;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.*;
+import java.nio.charset.Charset;
+import java.time.Instant;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,6 +63,7 @@ public class TranscriptionImpl implements Transcription {
 	public static final String UNDEFINED_FILE_NAME = "aishug294879ryshfda9763afo8947a5gf";
 
 	protected String fileName;
+	protected String lockFileName;
 
 	/**
 	 * The list of Tiers in this Transcription.
@@ -214,9 +219,21 @@ public class TranscriptionImpl implements Transcription {
 		}
 
 		this.fileName = fileName;
-
+		this.lockFileName = fff.getParent() + File.separator + "." + fff.getName() + ".lock";
+		
         lexiconLinks = new HashMap<String, LexiconLink>();
 
+        try
+        {
+    		this.lock();
+        }
+        catch (IOException e)
+        {
+        	System.err.println("Could not create lock file:");
+        	System.err.println(e.getLocalizedMessage());
+        	isLoaded = true; // prevent loading
+        }
+        
 		// HB, 3 dec 03. After this, media descriptors are instantiated, if in the EAF file
 		if (!isLoaded()) {
 			ACMTranscriptionStore.getCurrentTranscriptionStore().loadTranscription(this, decoderInfo);
@@ -230,7 +247,7 @@ public class TranscriptionImpl implements Transcription {
 			}
 		}
 	}
-
+	
 	@Override
 	public void addACMEditListener(ACMEditListener l){
 		if(!listeners.contains(l)) {
@@ -2418,5 +2435,24 @@ public class TranscriptionImpl implements Transcription {
 	 */
 	public UndoTransaction getCurrentUndoTransaction() {
 		return undoStack.peek();
+	}
+
+	@Override
+	public void unlock() {
+		System.out.println(String.format("Removing lock with filename %s", this.lockFileName));
+		File lockFile = new File(this.lockFileName);
+		lockFile.delete();
+	}
+	
+	private void lock() throws IOException
+	{
+		System.out.println(String.format("Creating lock with filename %s", this.lockFileName));
+		Path lockFilePath = Paths.get(this.lockFileName);
+		java.net.InetAddress localMachine = java.net.InetAddress.getLocalHost();
+		List<String> lockInfo = new ArrayList<String>();
+		lockInfo.add(Long.toString(Instant.now().getEpochSecond()));
+		lockInfo.add(System.getProperty("user.name"));
+		lockInfo.add(localMachine.getHostName());
+		Files.write(lockFilePath, lockInfo, Charset.forName("ASCII"), StandardOpenOption.CREATE_NEW);
 	}
 }
