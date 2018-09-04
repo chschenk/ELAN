@@ -61,7 +61,7 @@ public class TierSetUtil implements PreferencesListener{
 		try {
 			tierSetList = tierSetIO.read(new File(FileUtility.urlToAbsPath(fileURL)));
 		} catch (IOException e) {
-			ClientLogger.LOG.warning(ElanLocale.getString("TierSet.Error.FileNotFound"));
+			ClientLogger.LOG.info(ElanLocale.getString("TierSet.Error.FileNotFound"));
 		}
 		
 		if(tierSetList != null){
@@ -326,8 +326,7 @@ public class TierSetUtil implements PreferencesListener{
 
 	@Override
 	public void preferencesChanged() {
-		// TODO Auto-generated method stub
-		
+		// stub		
 	}
 	
 	/**

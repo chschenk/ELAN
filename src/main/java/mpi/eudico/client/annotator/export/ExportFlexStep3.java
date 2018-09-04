@@ -363,7 +363,7 @@ public class ExportFlexStep3 extends StepPane{
 		addButton.addActionListener(actionHandler);
 		removeButton.addActionListener(actionHandler);
 		
-		//type-lang congiguration panel
+		//type-lang configuration panel
 		JPanel radioPanel = new JPanel(new GridBagLayout());
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.anchor = GridBagConstraints.NORTHWEST;		   
@@ -531,20 +531,48 @@ public class ExportFlexStep3 extends StepPane{
 	}
 	
 	/**
-	 * Retracts the type information from the tier/linType name
-	 * Expected  tier/linType name format: < tier/linType-typeName-language>
-	 * 
+	 * Extracts or reconstructs the (FLEx) type information from the tier/linType name
+	 * Expected tier/linType name format: <(tier/linType)-typeName-language>,
+	 * so three components of which two can have a '-' hyphen (the delimiter used
+	 * by ELAN to construct tier and tier type names) in it.
+	 * The tier or tier type part can start with "interlinear-text", this is treated
+	 * separately. Other legal values might be added in the future?
+	 * The flex-item-type name part can be "title-abbreviation" or "text-is-translation"
+	 * or a custom name containing a '-', as allowed in FieldWorks 9 and higher. 
+	 * The language part probably won't contain a '-' in its part.
 	 *
 	 * @param  name from which the type has to extracted
-	 * @return type
+	 * @return type the extracted item type
 	 */
 	private String getTypeName(String name){
 		String type = null;
-		
+		// could match more FLEx elements containing a '-'
 		if(name.startsWith(FlexConstants.IT)){
-			name = name.substring(FlexConstants.IT.length());
+			name = name.substring(FlexConstants.IT.length());// name now starts with a "-"
 		}
 		
+		String[] compsArray = name.split("-");
+		if (compsArray.length == 3) {
+			// select second component
+			type = compsArray[1];
+		} else if (compsArray.length > 3) {
+			// glue all components except the first and the last together
+			/*
+			StringBuilder sb = new StringBuilder();
+			for (int i = 1; i < compsArray.length - 1; i++) {
+				sb.append(compsArray[i]);
+				if (i < compsArray.length - 2) {
+					sb.append("-");
+				}
+			}
+			type = sb.toString();
+			*/
+			// equivalent to
+			type = name.substring(name.indexOf("-") + 1, name.lastIndexOf("-"));
+		} else if (compsArray.length == 2) {
+			type = compsArray[0];//??
+		}
+		/*
 		int index = name.indexOf('-');
 		int nextIndex = -1;
 		
@@ -559,7 +587,7 @@ public class ExportFlexStep3 extends StepPane{
 				type = name.substring(index+1);
 			}
 		}
-		
+		*/
 		if(type == null || type.equals(FlexConstants.ITEM)){
 			type = SELECT_TYPE;
 		}
@@ -569,19 +597,25 @@ public class ExportFlexStep3 extends StepPane{
 	}
 	
 	/**
-	 * Retracts the language information from the tier/linType name
+	 * Extracts the language information from the tier/linType name
 	 * Expected tier/linType name format: <tier/linType-typeName-language>
 	 * 
-	 * @param name
-	 * @return lang
+	 * @param name the composed tier name or tier type name
+	 * @return lang the extracted language label
+	 * @see #getTypeName(String)
 	 */
 	private String getLanguage(String name){		
 		String lang = null;		
-		
+		// could match more FLEx elements containing a '-'
 		if(name.startsWith(FlexConstants.IT)){
 			name = name.substring(FlexConstants.IT.length());
 		}
 		
+		int lindex = name.lastIndexOf("-");
+		if (lindex > -1 && lindex < name.length() - 2) {
+			lang = name.substring(lindex + 1);
+		}
+		/*
 		int firstIndex = name.indexOf('-');	
 		int nextIndex = -1;
 		if(firstIndex+1 < name.length()){
@@ -591,7 +625,7 @@ public class ExportFlexStep3 extends StepPane{
 		if(nextIndex > -1 && firstIndex+1 < nextIndex){
 			lang = name.substring(nextIndex+1);
 		} 
-		
+		*/
 		return lang;
 	}
 	

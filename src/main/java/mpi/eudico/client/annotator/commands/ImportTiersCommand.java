@@ -140,12 +140,10 @@ public class ImportTiersCommand implements UndoableCommand, ClientLogger {
             //srcTrans.setNotifying(false);
             srcTrans.setLinguisticTypes(new ArrayList<LinguisticType>(types));
 
-            String tierName;
-            TierImpl tier;
             for (int i = 0; i < tierOrder.size(); i++) {
-                tierName = tierOrder.get(i);
+            	String tierName = tierOrder.get(i);
                 for (int j = 0; j < tiers.size(); j++) {
-                	tier = tiers.get(j);
+                	TierImpl tier = tiers.get(j);
                 	if (tierName.equals(tier.getName())) {
                 		srcTrans.addTier(tier);	
                 	}
@@ -213,6 +211,11 @@ public class ImportTiersCommand implements UndoableCommand, ClientLogger {
                 	ecvLoader.loadExternalCVs(transcription, null);
                 }
             }
+        }
+        // import the preferences of a template if the source of the import was an .etf file
+        if (fileName.toLowerCase().endsWith(".etf")) {
+        	Preferences.importPreferences(srcTrans, 
+        			fileName.substring(0, fileName.lastIndexOf('.'))  + ".pfsx");
         }
         
         // update preferences

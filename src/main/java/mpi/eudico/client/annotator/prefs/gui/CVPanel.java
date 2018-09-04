@@ -20,14 +20,10 @@ import mpi.eudico.client.annotator.prefs.PreferenceEditor;
 
 
 /**
- * Panel showing options for:<br>
- * - flag to set that deselecting the edit box commits changes (default is cancel)<br>
- * - flag to set that Enter commits the changes (default is adding a new line
- * char)<br>
- * - flag to set that the selection should be cleared after creation of a new annotation,
- * or modifying the time alignement etc.
- * 
- * @author Han Sloetjes
+ * Panel showing options for controlled vocabularies:<br>
+ * - width of the inline edit box and visibility of a description column <br>
+ * - behavior of the suggestions panel <br> 
+ * - annotation value precedence over cve_ref in case of updates of an external CV
  */
 @SuppressWarnings("serial")
 public class CVPanel extends AbstractEditPrefsPanel implements PreferenceEditor, ChangeListener {
@@ -41,6 +37,8 @@ public class CVPanel extends AbstractEditPrefsPanel implements PreferenceEditor,
     private JTextField inlineWidthTF;
     private JTextField cvWidthPercentageTF;
     
+    private JCheckBox annotationValuePrecedenceCB;
+    
     private int oriInlineBoxWidth = 0;
     private int oriCVWidthPercentage = 30;
     
@@ -49,6 +47,7 @@ public class CVPanel extends AbstractEditPrefsPanel implements PreferenceEditor,
     private boolean oriSuggestIgnoreCaseFlag = false;
     
     private boolean oriShowDescriptionFlag = true;
+    private boolean oriAnnotationValuePrecedenceFlag = false;
     
     private int newInlineBoxWidth; // initialized on reading preferences
     private int newCVWidthPercentage; // initialized on reading preferences   
@@ -102,6 +101,11 @@ public class CVPanel extends AbstractEditPrefsPanel implements PreferenceEditor,
         	oriCVWidthPercentage = intPref.intValue();
         }
         newCVWidthPercentage = oriCVWidthPercentage;
+        
+        boolPref = Preferences.getBool("AnnotationValuePrecedenceOverCVERef", null);
+        if (boolPref != null) {
+        	oriAnnotationValuePrecedenceFlag = boolPref.booleanValue();
+        }
        
     }  
 
@@ -124,13 +128,15 @@ public class CVPanel extends AbstractEditPrefsPanel implements PreferenceEditor,
         }
         cvWidthPercentageTF = new JTextField(Integer.toString(oriCVWidthPercentage), 5);
         
+        annotationValuePrecedenceCB = new JCheckBox(ElanLocale.getString(
+        		"PreferencesDialog.CV.ECVUpdate.AnnotationPrecedence"), oriAnnotationValuePrecedenceFlag);
         
         suggestEntryContainsCB.setFont(suggestEntryContainsCB.getFont().deriveFont(Font.PLAIN));
         suggestSearchDescCB.setFont(suggestEntryContainsCB.getFont());
         suggestIgnoreCaseCB.setFont(suggestEntryContainsCB.getFont());  
         inlineWidthTF.setFont(suggestEntryContainsCB.getFont());
         cvWidthPercentageTF.setFont(suggestEntryContainsCB.getFont());
-      
+        annotationValuePrecedenceCB.setFont(suggestEntryContainsCB.getFont());
         
         GridBagConstraints gbc = new GridBagConstraints();       
         
@@ -197,6 +203,14 @@ public class CVPanel extends AbstractEditPrefsPanel implements PreferenceEditor,
         gbc.gridy = gy++;
         outerPanel.add(suggestIgnoreCaseCB, gbc);
         
+        gbc.gridy = gy++;
+        gbc.insets = catInset;
+        outerPanel.add(new JLabel(ElanLocale.getString("PreferencesDialog.CV.ECVUpdate")), gbc);
+        
+        gbc.gridy = gy++;
+        gbc.insets = globalInset;
+        outerPanel.add(annotationValuePrecedenceCB, gbc);
+        
         gbc.gridy = gy++; 
         gbc.weighty = 1.0;
         gbc.weightx = 1.0;
@@ -233,10 +247,11 @@ public class CVPanel extends AbstractEditPrefsPanel implements PreferenceEditor,
             
             chMap.put("InlineEditBoxWidth", newInlineBoxWidth);
             chMap.put("InlineEditBoxCvWidthPercentage", newCVWidthPercentage);
-                     
-            /* kj: instead of this, look at the index
-             * language can be changed in the meantime
-             */
+
+            if (annotationValuePrecedenceCB.isSelected() != oriAnnotationValuePrecedenceFlag) {
+            	chMap.put("AnnotationValuePrecedenceOverCVERef", 
+            			Boolean.valueOf(annotationValuePrecedenceCB.isSelected()));
+            }
 
             return chMap;
         }
@@ -255,7 +270,8 @@ public class CVPanel extends AbstractEditPrefsPanel implements PreferenceEditor,
                 suggestIgnoreCaseCB.isSelected() != oriSuggestIgnoreCaseFlag ||
                 showDescriptionCB.isSelected() != oriShowDescriptionFlag ||
                 newInlineBoxWidth != oriInlineBoxWidth ||
-                newCVWidthPercentage != oriCVWidthPercentage 
+                newCVWidthPercentage != oriCVWidthPercentage ||
+                annotationValuePrecedenceCB.isSelected() != oriAnnotationValuePrecedenceFlag
                 ) {
             return true;
         }

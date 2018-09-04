@@ -2,14 +2,13 @@ package mpi.eudico.client.annotator.commands;
 
 import java.awt.Dimension;
 
-import mpi.eudico.client.annotator.ElanLocale;
+import javax.swing.JDialog;
 
+import mpi.eudico.client.annotator.ElanLocale;
 import mpi.eudico.client.annotator.gui.multistep.MultiStepPane;
 import mpi.eudico.client.annotator.gui.multistep.StepPane;
-
 import mpi.eudico.client.annotator.imports.MergeStep1;
 import mpi.eudico.client.annotator.imports.MergeStep2;
-
 import mpi.eudico.server.corpora.clomimpl.abstr.TranscriptionImpl;
 
 
@@ -49,10 +48,12 @@ public class MergeTranscriptionsDlgCommand implements Command {
         pane.addStep(step1);
         pane.addStep(step2);
 
-        pane.setPreferredSize(new Dimension(650,500));
+        pane.setPreferredSize(new Dimension(650,550));
         
-        pane.createDialog(ELANCommandFactory.getRootFrame(transcription),
-            ElanLocale.getString("MergeTranscriptionDialog.Title"), true).setVisible(true);
+        JDialog jd = pane.createDialog(ELANCommandFactory.getRootFrame(transcription),
+            ElanLocale.getString("MergeTranscriptionDialog.Title"), true);
+        jd.pack();
+        jd.setVisible(true);
     }
 
     /**

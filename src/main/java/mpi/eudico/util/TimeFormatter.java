@@ -26,7 +26,15 @@ public class TimeFormatter {
     /** a n-digit.three-digit formatter */
     private static final DecimalFormat secondsMillis = new DecimalFormat("#0.000",
             new DecimalFormatSymbols(Locale.US));
-
+    
+    /* in practice the decimal separator is either '.' or ','
+    static {
+    	for (Locale l : DecimalFormatSymbols.getAvailableLocales()) {
+    		System.out.println(String.format("Locale: %s - Decimal char: %s",
+    				l.getDisplayName(), DecimalFormatSymbols.getInstance(l).getDecimalSeparator()));
+    	}
+    }
+	*/
     /**
      * Converts a time definition in the format hh:mm:ss.sss into a long that
      * contains the time in milli seconds.
@@ -54,18 +62,25 @@ public class TimeFormatter {
             
             int mark1 = timeString.indexOf(':', 0);
 
-            if (mark1 == -1) { // no :, so interpret string as sss.ss or ms
-            	// HS apr-2006: added millisecond support; doesn't this break
-            	// anything??
+            if (mark1 == -1) { // no ':', so interpret string as sss.ss or ms
+            	// HS apr-2006: added millisecond support
             	if (timeString.indexOf('.') < 0) {
-            		// no ':' nor '.', so interpret as bare milliseconds??
-            		if (negative) {
-            			return -Long.parseLong(timeString);
+            		// no ':' nor '.', so interpret as milliseconds
+            		// or first try ',' for comma based seconds formats: 22,345
+            		int comma = timeString.indexOf(',');
+            		if (comma < 0) {
+            			// no ':', '.' or ',', so interpret as milliseconds
+	            		if (negative) {
+	            			return -Long.parseLong(timeString);
+	            		} else {
+	            			return Long.parseLong(timeString);
+	            		}
             		} else {
-            			return Long.parseLong(timeString);
+            			// replace ',' by '.'
+            			secondString = timeString.replace(',', '.');
             		}
             	} else {
-            		// no :, so interpret string as sss.ss
+            		// no ':', so interpret string as sss.ss
             		secondString = timeString;
             	}
 

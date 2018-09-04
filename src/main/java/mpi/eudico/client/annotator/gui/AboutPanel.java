@@ -71,7 +71,7 @@ public class AboutPanel extends JPanel {
         textBuf.append("Version: ");
         textBuf.append(ELAN.getVersionString());
         textBuf.append("<br><br>");
-        textBuf.append("Copyright \u00A9 2001 - 2017");
+        textBuf.append("Copyright \u00A9 2001 - 2019");
         textBuf.append("<br>");
         textBuf.append("Max-Planck-Institute for Psycholinguistics");
         textBuf.append("<br>");

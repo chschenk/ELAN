@@ -50,7 +50,7 @@ import mpi.eudico.client.annotator.util.SystemReporting;
  */
 public class PraatConnection {
     /** constant for the name of the praat script, march 2011 version 3 */
-    private static final String PRAAT_SCRIPT = "openpraat-v3.praat";
+    private static final String PRAAT_SCRIPT = "openpraat-v4.praat";
     
     /** constant for a script to create a clip from a sound file, march 2011 version 3 */
     public static final String PRAAT_CLIP_SCRIPT = "createsoundclip-v3.praat";
@@ -517,7 +517,7 @@ public class PraatConnection {
             return true;
         } else {
             // first try to copy the file from the .jar
-            if (copyScriptFromJar(file, "/mpi/eudico/client/annotator/resources/openpraat-v3.praat")) {
+            if (copyScriptFromJar(file, "/mpi/eudico/client/annotator/resources/openpraat-v4.praat")) {
                 return true;
             } else {
                 // fallback: create the file programmatically

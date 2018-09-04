@@ -23,6 +23,7 @@ import mpi.eudico.server.corpora.event.IllegalEditException;
 import mpi.eudico.server.corpora.util.ACMEditableObject;
 import mpi.eudico.util.CVEntry;
 import mpi.eudico.util.ControlledVocabulary;
+import mpi.eudico.util.ExternalCV;
 import mpi.eudico.util.Pair;
 
 /**
@@ -1815,6 +1816,34 @@ System.out.println("after correction:");
 					break;
 				}
 			}
+			/*
+			// finally reposition time subdivision and included in dependent annotations
+			List<Annotation> parentListeners = new ArrayList<Annotation>(fixedAnnotation.getParentListeners());
+			long beginShift = newBegin - oldBegin;
+			for (Annotation dann : parentListeners) {
+				if (dann instanceof AlignableAnnotation) {
+					AlignableAnnotation depAA = (AlignableAnnotation) dann;
+					long depAAnewBT = Math.min(depAA.getBegin().getTime() + beginShift, newEnd);
+					if (depAA.getBegin() == fixedAnnotation.getBegin()) {
+						depAAnewBT = depAA.getBegin().getTime();
+					}
+					long depAAnewET = Math.min(depAA.getEnd().getTime() + beginShift, newEnd);
+					if (depAA.getEnd() == fixedAnnotation.getEnd()) {
+						depAAnewET = depAA.getEnd().getTime();
+					}
+					if (depAAnewBT >= newBegin && depAAnewET <= newEnd 
+							 ) {
+						if (depAA.getBegin() != fixedAnnotation.getBegin()) {
+							depAA.getBegin().setTime(depAAnewBT);
+						}
+						if (depAA.getEnd() != fixedAnnotation.getEnd()) {
+							depAA.getEnd().setTime(depAAnewET);
+						}
+//						forceChildAnnotationsOfAlignable(depAA);
+					}
+				}
+			}
+			*/
 		}
 
 		// left shift
@@ -2998,6 +3027,15 @@ System.out.println("after correction:");
 		if (cv == null || langIndex < 0) {
 			return;
 		}
+		// july 2018 if an external CV has not been loaded yet it has no entries and 
+		// all links from annotations to cv entries would be removed in the
+		// annotation loop following this test
+		if (cv instanceof ExternalCV) {
+			if ( !((ExternalCV) cv).isLoadedFromURL() &&
+					!((ExternalCV) cv).isLoadedFromCache()) {
+				return;
+			}
+		}
 		
 		// Ok, finally we can go and work on all annotations of this tier.
 		for (Annotation a : annotations) {
@@ -3048,7 +3086,15 @@ System.out.println("after correction:");
 			// Language not available: leave the annotations alone.
 			return;
 		}
-
+		// july 2018 if an external CV has not been loaded yet it has no entries and 
+		// all links from annotations to cv entries would be removed in the
+		// annotation loop following this test
+		if (cv instanceof ExternalCV) {
+			if ( !((ExternalCV) cv).isLoadedFromURL() &&
+					!((ExternalCV) cv).isLoadedFromCache()) {
+				return;
+			}
+		}
 		// Ok, finally we can go and work on all annotations of this tier.
 		for (Annotation a : annotations) {
 			CVEntry cve = cv.getEntryWithValue(langIndex, a.getValue());
@@ -3137,6 +3183,20 @@ System.out.println("after correction:");
 		@Override
 		public String getSortValue(TierImpl t) {
 			return t.getName();
+		};
+	}
+	
+	public static class ParentTierNameGetter implements ValueGetter {
+		@Override
+		public String getSortValue(TierImpl t) {
+			return t.getParentTier() == null ? "" : t.getParentTier().getName(); 
+		};
+	}
+	
+	public static class LocaleGetter implements ValueGetter {
+		@Override
+		public String getSortValue(TierImpl t) {
+			return t.getDefaultLocale() == null ? "" : t.getDefaultLocale().toString(); 
 		};
 	}
 }

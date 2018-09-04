@@ -433,8 +433,8 @@ public class EAFMultipleFindReplaceDialog extends JDialog
     	mfDialog.setSearchDirs(searchDirs);
     	mfDialog.setSearchPaths(searchPaths);
     	mfDialog.setVisible(true);
-    	searchDirs = (List<String>) mfDialog.getSearchDirs();// neccessary?
-    	searchPaths = (List<String>) mfDialog.getSearchPaths();//neccessary?
+    	searchDirs = (List<String>) mfDialog.getSearchDirs();// necessary?
+    	searchPaths = (List<String>) mfDialog.getSearchPaths();// necessary?
 
         if (searchPaths.size() > 0) {
         	String name;

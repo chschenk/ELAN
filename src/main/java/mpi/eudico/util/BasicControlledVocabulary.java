@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import mpi.eudico.client.annotator.prefs.RecentLanguages;
 import mpi.eudico.util.multilangcv.LangInfo;
@@ -45,6 +46,14 @@ public class BasicControlledVocabulary implements Iterable<CVEntry>, Cloneable {
     public static final String DEFAULT_LANGUAGE_ID = "und";
     public static final String DEFAULT_LANGUAGE_DEF = "http://cdb.iso.org/lg/CDB-00130975-001";
     public static final String DEFAULT_LANGUAGE_LABEL = "undetermined (und)";
+    /** an enumeration of property keys */
+    public enum PropKey {
+    	NAME,
+    	DESCRIPTION,
+    	NUM_ENTRIES,
+    	NUM_LANGUAGES,
+    	EXTERNAL_REF
+    }
     
     protected List<CVEntry> entries;
     private String name;
@@ -256,7 +265,7 @@ public class BasicControlledVocabulary implements Iterable<CVEntry>, Cloneable {
 	/**
 	 * A cheap way to get the number of CVEntries in the vocabulary.
 	 * Much better than {@code getEntries().length}...
-	 * @return
+	 * @return the number of entries
 	 */
     public int size() {
     	return entries.size();
@@ -265,7 +274,7 @@ public class BasicControlledVocabulary implements Iterable<CVEntry>, Cloneable {
 	/**
 	 * A cheap check to see if there are entries in the vocabulary.
 	 * Much better than {@code getEntries().length == 0}...
-	 * @return
+	 * @return true if there are no entries, false otherwise
 	 */
 	public boolean isEmpty() {
 		return entries.isEmpty();
@@ -1190,18 +1199,31 @@ loop:
     /*
      * Some methods to keep the mapping from ID to Entry up to date.
      */
-    private int idcounter = 0;
+    //private int idcounter = 0;
     
     /**
      * Ensure that every CVEntry has a unique id.
      * If the id has to be changed, it is put into the index.
      * 
+     * Aug 2018: implementation changed into using UUID's to prevent
+     * the same ID being used multiple times for different entries. This could
+     * happen when a CV was edited in multiple sessions, sometimes removing, sometimes
+     * adding new entries.
+     * 
      * @return true if this already was the case. If it returns false, the id was changed.
+     * The latter occurs with new entries that didn't have an ID before.
      */
     protected boolean ensureIdIsUnique(CVEntry entry) {
 		String id = entry.getId();
 		
 		if (id == null || id.isEmpty() || idToEntry.containsKey(id)) {
+			String newid = "cveid_" + UUID.randomUUID();
+			if (!idToEntry.containsKey(newid)) {// superfluous test
+				entry.internalSetId(newid);	// version that does not call us back 
+				idToEntry.put(newid, entry);
+				return false;
+			}
+			/*
 			// We need to give this entry a new id. Try a few.
 			for (;;) {
 				String newid = "cveid" + String.valueOf(idcounter);
@@ -1212,6 +1234,7 @@ loop:
 					return false;
 				}
 			}
+			*/
 		}
 		
 		return true;

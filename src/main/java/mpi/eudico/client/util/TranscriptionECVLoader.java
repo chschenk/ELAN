@@ -12,6 +12,7 @@ import javax.swing.JOptionPane;
 
 import mpi.eudico.client.annotator.Constants;
 import mpi.eudico.client.annotator.ElanLocale;
+import mpi.eudico.client.annotator.Preferences;
 import mpi.eudico.client.annotator.prefs.RecentLanguages;
 import mpi.eudico.client.annotator.util.ClientLogger;
 import mpi.eudico.server.corpora.clom.ExternalReference;
@@ -158,7 +159,13 @@ public class TranscriptionECVLoader {
         	}
         	
         	if (checkConsistency && numLoadedExternal > 0) {
-        		transcription.checkAnnotECVConsistency();
+        		boolean annotationValuePrecedence = false;
+        		Boolean prefBool = Preferences.getBool("AnnotationValuePrecedenceOverCVERef", null);
+        		if (prefBool != null) {
+        			annotationValuePrecedence = prefBool.booleanValue();
+        		}
+        		
+        		transcription.checkAnnotECVConsistency(annotationValuePrecedence);
         	}
         }
     }

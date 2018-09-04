@@ -49,6 +49,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
+import mpi.eudico.client.annotator.Constants;
 import mpi.eudico.client.annotator.ElanLocale;
 import mpi.eudico.client.annotator.ElanLocaleListener;
 import mpi.eudico.client.annotator.Preferences;
@@ -82,8 +83,8 @@ public class CommentViewer extends  AbstractViewer
 	public final static boolean USE_WEB_SERVICE = true;
 	public final static boolean DEBUG = CommentManager.DEBUG;
 	
-	private static Color readonlyColor = new Color(255, 255, 192); // light yellow
-	private static Color modifiableColor = Color.white;
+	private static Color readonlyColor = Constants.LIGHT_YELLOW; // light yellow
+	private static Color modifiableColor = Color.WHITE;
 	
 	private static Color filteredLightColor = new Color(208, 240, 255); // light blue
 	private Color unfilteredLightColor;

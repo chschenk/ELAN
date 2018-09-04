@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -47,7 +48,7 @@ import org.w3c.dom.Element;
  * Merging here means that a selected set of tiers with their annotations from one 
  * transcription are added to another transcription. If one or more of the tiers already exist
  * in the destination transcription annotations will either be overwritten or preserved, 
- * whichever the user choses.
+ * whichever the user chooses.
  * It is assumed that the destination transcription may be altered, that the destination 
  * file path has been checked and that, if the file already exists, it may be overwritten.
  */
@@ -61,6 +62,7 @@ public class MergeTranscriptionsCommand implements Command, ClientLogger {
     private List<String> selTiers;
     private boolean overwrite;
     private boolean addLinkedFiles;
+    private boolean copyAndRenameTiers = false;
     
     /**
      * A command to merge two transcriptions.
@@ -84,12 +86,18 @@ public class MergeTranscriptionsCommand implements Command, ClientLogger {
 	 *            <li>arg[1] = the path to the destination file (String)</li>
 	 *            <li>arg[2] = the names of the tiers to add to the destination
 	 *            (List&lt;String>)</li>
-	 *            <li>arg[3] = a flag to indicate whether existing annotations (Boolean)</li>
+	 *            <li>arg[3] = a flag to indicate whether existing annotations may be
+	 *            overwritten/modified (Boolean)</li>
+	 *            <li>arg[4] = a flag to indicate whether linked files from the second source
+	 *            should be added to the first (Boolean)</li>
+	 *            <li>arg[5] = a flag to indicate that tiers with the same name should not be
+	 *            merged but imported as a numbered copy (A_tier-1 etc.) (Boolean)</li>
 	 *            </ul>
 	 * @see mpi.eudico.client.annotator.commands.Command#execute(java.lang.Object,
 	 *      java.lang.Object[])
 	 */
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
 	public void execute(Object receiver, Object[] arguments) {
         destTrans = (TranscriptionImpl) receiver;
         srcTrans = (TranscriptionImpl) arguments[0];
@@ -97,6 +105,9 @@ public class MergeTranscriptionsCommand implements Command, ClientLogger {
         selTiers = (List<String>) arguments[2];
         overwrite = ((Boolean) arguments[3]).booleanValue();
         addLinkedFiles = ((Boolean) arguments[4]).booleanValue();
+        if (arguments.length >= 6) {
+        	copyAndRenameTiers = ((Boolean) arguments[5]).booleanValue();
+        }
         
         if (destTrans != null) {
             destTrans.setNotifying(false);
@@ -218,6 +229,27 @@ public class MergeTranscriptionsCommand implements Command, ClientLogger {
             try {
 	            progressUpdate(5, "Checking tiers to add...");
 	            MergeUtil mergeUtil = new MergeUtil();
+	            Map<String, String> tierNameMap = null;
+	            
+	            if (copyAndRenameTiers) {
+	            	tierNameMap = mergeUtil.getRenamingTierMap(srcTrans, 
+	            			destTrans, selTiers);
+	            	//System.out.println(tierNameMap);
+	            	Iterator<Entry<String, String>> entryIt = tierNameMap.entrySet().iterator();	            	
+	            	while (entryIt.hasNext()) {
+	            		Entry<String, String> entry = entryIt.next();
+	            		if (!entry.getKey().equals(entry.getValue())) {
+	            			// rename the tier in the source transcription
+	            			// should be safe, no null test required
+	            			srcTrans.getTierWithId(entry.getKey()).setName(entry.getValue());
+	            			// replace the tier name in the list of selected tiers
+	            			selTiers.set(selTiers.indexOf(entry.getKey()), entry.getValue());
+	            			// or
+//	            			selTiers.remove(entry.getKey());
+//	            			selTiers.add(entry.getValue());
+	            		}
+	            	}
+	            }
 	            // list of tiers ( and/or annotations) that can be added
 	            List<TierImpl> tiersToAdd = mergeUtil.getAddableTiers(srcTrans, destTrans, selTiers);
 	            progressUpdate(10, "Sorting the tiers to add...");
@@ -303,13 +335,31 @@ public class MergeTranscriptionsCommand implements Command, ClientLogger {
 	            PreferencesWriter xmlPrefsWriter = new PreferencesWriter();    		
 	        	String prefName = fileName.substring(0, fileName.lastIndexOf('.'));
 	        	prefName = prefName + ".pfsx";
-	        	// hier... merge important elements of the preferences of the source transcription into the preferences
+	        	// merge important elements of the preferences of the source transcription into the preferences
 	        	// of the destination
 	        	Map/*<String, Map>*/ destPrefs = Preferences.loadPreferencesForFile(destTrans.getFullPath());
 	        	Map<String, Object> srcPrefs = Preferences.loadPreferencesForFile(srcTrans.getFullPath());
 	        	mergePrefs(destPrefs, srcPrefs);
 	        	xmlPrefsWriter.encodeAndSave(destPrefs, prefName); 	        	
 	            
+	        	// could reverse the changes in the source transcription
+	        	if (copyAndRenameTiers && tierNameMap != null) {
+	            	Iterator<Entry<String, String>> entryIt = tierNameMap.entrySet().iterator();	            	
+	            	while (entryIt.hasNext()) {
+	            		Entry<String, String> entry = entryIt.next();
+	            		if (!entry.getKey().equals(entry.getValue())) {
+	            			// rename the tier in the source transcription
+	            			// should be safe, no null test required
+	            			srcTrans.getTierWithId(entry.getValue()).setName(entry.getKey());
+	            			// replace the tier name in the list of selected tiers
+	            			selTiers.set(selTiers.indexOf(entry.getValue()), entry.getKey());
+	            			// or
+//	            			selTiers.remove(entry.getValue());
+//	            			selTiers.add(entry.getKey());
+	            		}
+	            	}
+	        	}
+	        	
 	            progressComplete("Merging complete");
             } catch (Exception ex) {
                 LOG.severe("Error while merging: " + ex.getMessage());

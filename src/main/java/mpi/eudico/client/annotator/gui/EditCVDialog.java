@@ -54,7 +54,7 @@ import mpi.eudico.util.ExternalCVEntry;
 
 
 /**
- * $Id: EditCVDialog.java 46376 2018-01-31 15:55:27Z hasloe $
+ * $Id: EditCVDialog.java 46494 2018-07-31 11:16:35Z hasloe $
  *
  * The Edit Controlled Vocabulary dialog is a dialog for defining and changing
  * controlled vocabularies and their entries.<br>
@@ -403,7 +403,11 @@ public class EditCVDialog extends AbstractEditCVDialog implements ActionListener
 	}
 
 	/**
-     * Prompts the user to select an template import file.
+     * Prompts the user to select an import file, which can be a template file
+     * (.etf), an .eaf file or a .csv file with a specific format.
+     * .ecv could be added here, although that might cause confusion because 
+     * the difference between linking an .ecv and importing an .ecv (which would
+     * turn the external CV's into internal CV's) could be unclear.
      *
      * @return the template file, or null when no valid file was selected
      */
@@ -412,6 +416,7 @@ public class EditCVDialog extends AbstractEditCVDialog implements ActionListener
     	ArrayList<String[]> extensions = new ArrayList<String[]>();
         extensions.add(FileExtension.EAF_EXT);
         extensions.add(FileExtension.TEMPLATE_EXT);
+        //extensions.add(FileExtension.ECV_EXT);
         
         FileChooser chooser = new FileChooser(this);
         chooser.createAndShowFileDialog(ElanLocale.getString("EditCVDialog.Import.Title"), 

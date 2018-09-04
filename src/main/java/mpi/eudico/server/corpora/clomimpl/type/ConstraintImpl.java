@@ -11,7 +11,7 @@ import mpi.eudico.server.corpora.clomimpl.abstr.TierImpl;
 
 /**
  * DOCUMENT ME!
- * $Id: ConstraintImpl.java 43571 2015-03-23 15:28:01Z olasei $
+ * $Id: ConstraintImpl.java 46477 2018-07-25 12:55:45Z hasloe $
  * @author $Author$
  * @version $Revision$
  */
@@ -229,4 +229,23 @@ public abstract class ConstraintImpl implements Constraint {
 		
 		return copy;
 	}
+	
+    /**
+     * @param typeConstant one of the stereotype constants, TIME_SUBDIVISION etc.
+     * @return a String representation of the stereotype
+     */
+    public static String getStereoTypeName(int typeConstant) {
+    	switch(typeConstant) {
+    	case Constraint.TIME_SUBDIVISION:
+    		return Constraint.publicStereoTypes[0];
+    	case Constraint.INCLUDED_IN:
+    		return Constraint.publicStereoTypes[1];
+    	case Constraint.SYMBOLIC_SUBDIVISION:
+    		return Constraint.publicStereoTypes[2];
+    	case Constraint.SYMBOLIC_ASSOCIATION:
+    		return Constraint.publicStereoTypes[3];
+    	default:
+    		return "No Constraint";
+    	}
+    }
 }

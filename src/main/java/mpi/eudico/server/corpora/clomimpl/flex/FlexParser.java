@@ -10,6 +10,7 @@ import mpi.eudico.server.corpora.clomimpl.abstr.MediaDescriptor;
 import mpi.eudico.server.corpora.clomimpl.abstr.Parser;
 import mpi.eudico.server.corpora.clomimpl.abstr.PropertyImpl;
 import mpi.eudico.server.corpora.clomimpl.dobes.AnnotationRecord;
+import mpi.eudico.server.corpora.clomimpl.dobes.LanguageRecord;
 import mpi.eudico.server.corpora.clomimpl.dobes.LingTypeRecord;
 import mpi.eudico.server.corpora.clomimpl.dobes.TierRecord;
 import mpi.eudico.server.corpora.clomimpl.type.Constraint;
@@ -65,6 +66,8 @@ public class FlexParser extends Parser {
     
     /** stores language - font-vernacular pairs */
     private HashMap<String, String> langMap = new HashMap<String, String>();
+    /** stores Language Records if it was possible to retrieve/construct those */
+    private final List<LanguageRecord> languages = new ArrayList<LanguageRecord>();
     
     private ArrayList<Property> properties;
     
@@ -158,10 +161,17 @@ public class FlexParser extends Parser {
 	}
 	
 	/**
+     * July 2018: now returns null, the item's language is set as the tier's 
+     * content language from now on.
      * 
+     * @param tierName the name of the tier
+     * @param the file name
+     * @return the Locale, now null 
      */    
 	@Override
 	public Locale getDefaultLanguageOf(String tierName, String fileName) {
+		return null;
+		/*
     	parse(fileName);
 		
     	TierRecord tr = tierMap.get(tierName);
@@ -171,6 +181,7 @@ public class FlexParser extends Parser {
     	}
     	// use "en" if no other specified. otherwise possible ID conflict with the "en-US" default of a tier.
         return new Locale("en");
+        */
 	}
 
     /**
@@ -402,7 +413,36 @@ public class FlexParser extends Parser {
     	return properties;
 	}
 	
-    private void parse(String fileName) {
+	/**
+	 * @param fileName the file to be parsed
+	 * @return a list of Language Records retrieved from the flextext file.
+	 */
+    @Override
+	public List<LanguageRecord> getLanguages(String fileName) {
+    	parse(fileName); // for historic reasons
+		// TODO: convert two letter 639-1 codes to 639-3 language info objects
+		return languages;
+	}
+
+    /**
+     * @param tierName the name of the tier to retrieve the language for
+     * @param fileName the file to be parsed
+     * @return the language reference as a string or null
+     */
+	@Override
+	public String getLangRefOf(String tierName, String fileName) {
+		parse(fileName); // for historic reasons
+		
+    	TierRecord tr = tierMap.get(tierName);
+    	if (tr != null) {
+    		// could/should check the length of the language string?
+    		return tr.getLangRef();// could be null
+    	}
+    	
+		return null;
+	}
+
+	private void parse(String fileName) {
         if (parsed) {
             return;
         }
@@ -616,6 +656,7 @@ public class FlexParser extends Parser {
     				TierRecord tr = new TierRecord();
     				tr.setName(tName);
     				tr.setDefaultLocale(item.lang);
+    				tr.setLangRef(item.lang);
     				tierMap.put(tName, tr);
     				
     				if (i == 0) {
@@ -683,6 +724,7 @@ public class FlexParser extends Parser {
 		    					TierRecord tr = new TierRecord();   			    		
 			    			    tr.setName(tName);			    			   
 			    			    tr.setDefaultLocale(item.lang);	
+			    			    tr.setLangRef(item.lang);
 			    			    if(elem.speaker != null && !elem.speaker.equals(UNKNOWN)){				    		
 						    		tr.setParticipant(elem.speaker);
 						    	}
@@ -800,6 +842,7 @@ public class FlexParser extends Parser {
 			    		TierRecord tr = new TierRecord();
 			    		tr.setName(tName);
 			    		tr.setDefaultLocale(item.lang);
+			    		tr.setLangRef(item.lang);
 			    		if(elem.speaker != null && !elem.speaker.equals(UNKNOWN)){				    		
 				    		tr.setParticipant(elem.speaker);
 				    	}
@@ -916,6 +959,7 @@ public class FlexParser extends Parser {
 			    		TierRecord tr = new TierRecord();
 			    		tr.setName(tName);
 			    		tr.setDefaultLocale(item.lang);
+			    		tr.setLangRef(item.lang);
 			    		if(elem.speaker != null && !elem.speaker.equals(UNKNOWN)){				    		
 				    		tr.setParticipant(elem.speaker);
 				    	}
@@ -1590,6 +1634,7 @@ public class FlexParser extends Parser {
             			value = value + DEL + vernacular;
             		}
             		langMap.put(lang, value);
+            		languages.add(new LanguageRecord(lang, lang, lang));
             	}
             } else if(FlexConstants.MEDIA.equals(qName)){
             	String medPath = atts.getValue(FlexConstants.LOCATION);

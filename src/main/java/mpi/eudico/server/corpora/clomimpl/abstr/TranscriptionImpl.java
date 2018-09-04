@@ -1486,7 +1486,7 @@ public class TranscriptionImpl implements Transcription {
 		boolean newChange = false;
 		String oldName = cv.getName();
 		String oldDescription = cv.getDescription(langIndex);
-		// doublecheck on the name
+		// double check on the name
 		ControlledVocabulary conVoc;
 		for (int i = 0; i < controlledVocabularies.size(); i++) {
 			conVoc = controlledVocabularies.get(i);
@@ -1516,8 +1516,12 @@ public class TranscriptionImpl implements Transcription {
 	 * To be called after externally defined Controlled Vocabularies have been 
 	 * loaded. Checks whether annotations that link to an entry in such a CV 
 	 * have to be updated as a result of a change in the CV.
+	 * 
+	 * @param annotationValuePrecedence a flag to indicate that the value of an annotation
+	 * should take precedence over a reference to the ID of a CVEntry. If true, the value
+	 * is not changed in case of an inconsistency but the CVEntry id ref. is updated instead.
 	 */
-	public void checkAnnotECVConsistency() {
+	public void checkAnnotECVConsistency(boolean annotationValuePrecedence) {
 		for (TierImpl currentTier : tiers) {
 			Pair<ControlledVocabulary, Integer> pair = currentTier.getEffectiveLanguage();
 			
@@ -1538,21 +1542,44 @@ public class TranscriptionImpl implements Transcription {
 				for (AbstractAnnotation currentAnn : currentTier.getAnnotations()) {
 					String cvEntryRefId = currentAnn.getCVEntryId();
 					if (cvEntryRefId == null) {
+						// check if there is a an entry with the same value, and add a ref
+						if (!currentAnn.getValue().isEmpty()) {
+							CVEntry cvEntry = ecv.getEntryWithValue(langIndex, currentAnn.getValue());
+							if (cvEntry != null) {
+								currentAnn.setCVEntryId(cvEntry.getId());
+								setChanged();
+							}
+						}
 						continue;
 					}
 					
-					CVEntry entry = ecv.getEntrybyId(cvEntryRefId);
-					String value;
-					if (entry != null && 
-							(value = entry.getValue(langIndex)) != null &&
-							!value.equals(currentAnn.getValue())) {
-						currentAnn.setValue(value);
-						setChanged();
-					} else if (entry == null) {
-						// The entry the External Ref. refers to is no longer
-						// there, so remove the CV Entry ID from the annotation
-						currentAnn.setCVEntryId(null);
-						setChanged();
+					if (annotationValuePrecedence) {
+						if (!currentAnn.getValue().isEmpty()) {
+							CVEntry cvEntry = ecv.getEntryWithValue(langIndex, currentAnn.getValue());
+							if (cvEntry != null) {
+								if (!cvEntryRefId.equals(cvEntry.getId())) {
+									currentAnn.setCVEntryId(cvEntry.getId());
+									setChanged();
+								}
+							} else {
+								currentAnn.setCVEntryId(null);
+								setChanged();
+							}
+						}
+					} else {				
+						CVEntry entry = ecv.getEntrybyId(cvEntryRefId);
+						String value;
+						if (entry != null && 
+								(value = entry.getValue(langIndex)) != null &&
+								!value.equals(currentAnn.getValue())) {
+							currentAnn.setValue(value);
+							setChanged();
+						} else if (entry == null) {
+							// The entry the External Ref. refers to is no longer
+							// there, so remove the CV Entry ID from the annotation
+							currentAnn.setCVEntryId(null);
+							setChanged();
+						}
 					}
 				}
 			}

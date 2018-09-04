@@ -108,6 +108,7 @@ import mpi.eudico.client.annotator.commands.global.MultiFileAnnotationsFromOverl
 import mpi.eudico.client.annotator.commands.global.MultiFileAnnotationsFromSubtractionMA;
 import mpi.eudico.client.annotator.commands.global.MultiFindReplaceMA;
 import mpi.eudico.client.annotator.commands.global.MultipleFileMergeTiersMA;
+import mpi.eudico.client.annotator.commands.global.MultipleFileUpdateWithTemplateMA;
 import mpi.eudico.client.annotator.commands.global.MultipleFilesEditMA;
 import mpi.eudico.client.annotator.commands.global.NewMA;
 import mpi.eudico.client.annotator.commands.global.NextWindowMA;
@@ -1274,6 +1275,10 @@ public class ElanFrame2 extends JFrame implements ActionListener,
         
         ma = new UpdateMultiForECVMA(ELANCommandFactory.UPDATE_TRANSCRIPTIONS_FOR_ECV, this);
 		menuActions.put(ELANCommandFactory.UPDATE_TRANSCRIPTIONS_FOR_ECV, ma);
+		mfProcessMenu.add(new JMenuItem(ma));
+		
+        ma = new MultipleFileUpdateWithTemplateMA(ELANCommandFactory.UPDATE_TRANSCRIPTIONS_WITH_TEMPLATE, this);
+		menuActions.put(ELANCommandFactory.UPDATE_TRANSCRIPTIONS_WITH_TEMPLATE, ma);
 		mfProcessMenu.add(new JMenuItem(ma));
         
         ma = new ClipMediaMultiMA(ELANCommandFactory.CLIP_MEDIA_MULTI, this);

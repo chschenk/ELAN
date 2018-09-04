@@ -36,46 +36,46 @@ public class Constants {
     public static Color DEFAULTBACKGROUNDCOLOR = new Color(230, 230, 230);
 
     /** Holds value of property DOCUMENT ME! */
-    public static Color DEFAULTFOREGROUNDCOLOR = Color.black;
+    public static Color DEFAULTFOREGROUNDCOLOR = Color.BLACK;
 
     /** Holds value of property DOCUMENT ME! */
     public static Color SELECTIONCOLOR = new Color(204, 204, 255);
 
     /** Holds value of property DOCUMENT ME! */
-    public static Color CROSSHAIRCOLOR = Color.red;
+    public static Color CROSSHAIRCOLOR = Color.RED;
     
     /** ALBERT */
-    public static Color SEGMENTATIONCOLOR = Color.blue;
+    public static Color SEGMENTATIONCOLOR = Color.BLUE;
 
     /** Holds value of property DOCUMENT ME! */
-    public static Color ACTIVEANNOTATIONCOLOR = Color.blue;
+    public static Color ACTIVEANNOTATIONCOLOR = Color.BLUE;
 
     /** Holds value of property DOCUMENT ME! */
-    public static Color MEDIAPLAYERCONTROLSLIDERSELECTIONCOLOR = Color.gray;
+    public static Color MEDIAPLAYERCONTROLSLIDERSELECTIONCOLOR = Color.GRAY;
 
     /** Holds value of property DOCUMENT ME! */
-    public static Color MEDIAPLAYERCONTROLSLIDERCROSSHAIRCOLOR = Color.red.darker();
+    public static Color MEDIAPLAYERCONTROLSLIDERCROSSHAIRCOLOR = Color.RED.darker();
 
     /** Holds value of property DOCUMENT ME! */
-    public static Color SIGNALSTEREOBLENDEDCOLOR1 = Color.green;
+    public static Color SIGNALSTEREOBLENDEDCOLOR1 = Color.GREEN;
 
     /** Holds value of property DOCUMENT ME! */
-    public static Color SIGNALSTEREOBLENDEDCOLOR2 = Color.blue;
+    public static Color SIGNALSTEREOBLENDEDCOLOR2 = Color.BLUE;
 
     /** Holds value of property DOCUMENT ME! */
     public static Color SIGNALCHANNELCOLOR = new Color(224, 224, 224);
 
     /** Holds value of property DOCUMENT ME! */
-    public static Color SHAREDCOLOR1 = Color.orange;
+    public static Color SHAREDCOLOR1 = Color.ORANGE;
 
     /** Holds value of property DOCUMENT ME! */
-    public static Color SHAREDCOLOR2 = Color.yellow;
+    public static Color SHAREDCOLOR2 = Color.YELLOW;
 
     /** Holds value of property DOCUMENT ME! */
-    public static Color SHAREDCOLOR3 = Color.gray;
+    public static Color SHAREDCOLOR3 = Color.GRAY;
 
     /** Holds value of property DOCUMENT ME! */
-    public static Color SHAREDCOLOR4 = Color.white;
+    public static Color SHAREDCOLOR4 = Color.WHITE;
     
     public static Color SHAREDCOLOR5 = new Color(128, 0, 128);
     public static Color SHAREDCOLOR6 = Color.DARK_GRAY;
@@ -88,7 +88,9 @@ public class Constants {
     /** the background color for the even rows in a table or list */
     public static final Color EVEN_ROW_BG = new Color(234, 245, 245);
     /** the background color for the selected row in a table or list */
-    public static final Color SELECTED_ROW_BG = new Color(200,215,215);
+    public static final Color SELECTED_ROW_BG = new Color(200, 215, 215);
+    /** a light yellow background color */
+    public static final Color LIGHT_YELLOW = new Color(255, 255, 192);
 
     /** the Look & Feel default font for labels, not a constant, can be null */
     public static Font DEFAULT_LF_LABEL_FONT = null;
@@ -104,6 +106,10 @@ public class Constants {
     
     /** the scale factor to use for a slightly smaller version of a font */
     public static final float SMALLFONT_SCALE_FACTOR = 0.84f;
+    
+    /** the lower boundary for automatic scaling of the font for high resolution
+     * displays. The default UI font seems readable with DPI is 144 or lower */
+    public static final int LOW_RES_SCREEN_DPI = 144;
 
     /** Holds value of property DOCUMENT ME! */
     public static final int SCROLLMIN = 0;

@@ -717,9 +717,9 @@ public class EditCVPanel extends JPanel implements ActionListener,
     }
     
     /**
-     * Re-extracts the entries from the current CV after an add, change or
-     * delete entry operation on the CV.
-     *
+     * Sorts the entries from the current CV in alphabetical order, 
+     * ascending or descending. The order is changed in the CV, not only
+     * in the list or table. 
      */
     protected void sortEntries() {
     	if (cv != null) {            
@@ -912,7 +912,8 @@ public class EditCVPanel extends JPanel implements ActionListener,
      * Enables or disables buttons depending on the selected entries.
      */
      private void updateSortButtons() {
-         if (entryTable != null && entryTableModel.getRowCount() > 1) {
+         if (entryTable != null && entryTableModel.getRowCount() > 1 &&
+        		 !(cv instanceof ExternalCV)) {
              ascendingButton.setEnabled(true);
              descendingButton.setEnabled(true);             
          }

@@ -9,6 +9,40 @@ public class LexiconIdentification implements Comparable<LexiconIdentification> 
 	private String id;
 	private String name;
 	private String description;
+	
+	/**
+	 * Constructor.
+	 */
+	public LexiconIdentification() {
+		super();
+	}
+
+	/**
+	 * Constructor.
+	 * @param id the id of a  lexicon
+	 * @param name the name of a lexicon
+	 */
+	public LexiconIdentification(String id, String name) {
+		super();
+		this.id = id;
+		this.name = name;
+	}
+	
+	/**
+	 * Copy constructor, copies all fields ot the original.
+	 *  
+	 * @param otherLexIdent the LexiconIdentification to copy
+	 */
+	public LexiconIdentification(LexiconIdentification otherLexIdent) {
+		super();
+		if (otherLexIdent != null) {
+			this.id = otherLexIdent.getId();
+			this.name = otherLexIdent.getName();
+			this.description = otherLexIdent.getDescription();
+		}// otherwise all fields will be null
+	}
+
+
 	/**
 	 * @return the id
 	 */

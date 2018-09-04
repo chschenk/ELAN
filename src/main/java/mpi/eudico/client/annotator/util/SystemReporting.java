@@ -1,8 +1,14 @@
 package mpi.eudico.client.annotator.util;
 
+import java.awt.Dimension;
+import java.awt.DisplayMode;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class SystemReporting {
@@ -84,6 +90,7 @@ public class SystemReporting {
 			antiAliasedText = true;
 		}
 		// for now under J 1.6 only apply the text anti aliasing property
+		@SuppressWarnings("rawtypes")
 		Map map = (Map)(Toolkit.getDefaultToolkit().getDesktopProperty("awt.font.desktophints"));
 
 		if (map != null) {
@@ -206,7 +213,47 @@ public class SystemReporting {
 		}
 	}
 
+	/**
+	 * 
+	 * @return a list containing one line per active, physical screen and
+	 * one line with the main screen resolution
+	 */
+	public static List<String> getScreenInfo() {
+		List<String> infoList = new ArrayList<String>(4);
+		try {
+			GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+			GraphicsDevice[] screens = ge.getScreenDevices();
+			int count = 0;
+			for (GraphicsDevice gd : screens) {
+				count++;
+				DisplayMode dMode = gd.getDisplayMode();
+				infoList.add(String.format("Screen %d - isDefault:%b, %s", 
+						count, (gd == ge.getDefaultScreenDevice()), 
+						String.format("w:%d, h:%d, bitDepth:%d", dMode.getWidth(), dMode.getHeight(), 
+								dMode.getBitDepth())));
+			}
 
+			Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+			infoList.add(String.format("Main screen resolution:%d (w:%d, h:%d)", 
+					Toolkit.getDefaultToolkit().getScreenResolution(), dim.width, dim.height));
+		} catch (Throwable t) {
+		}
+		return infoList;
+	}
+	
+	/**
+	 * 
+	 * @return the resolution in dots-per-inch of the primary screen (which may not be actually 
+	 * used for display)
+	 */
+	public static int getScreenResolution() {
+		try {
+			return Toolkit.getDefaultToolkit().getScreenResolution();
+		} catch (Throwable t) {
+			return 0;
+		}
+	}
+	
 	/**
 	   testing
 	 */

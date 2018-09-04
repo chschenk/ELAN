@@ -7,6 +7,8 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -88,6 +90,7 @@ public class MergeStep2 extends StepPane implements ProgressListener, ActionList
     private JButton allButton;
     private JButton noneButton;
     private JCheckBox overwriteCB;
+    private JCheckBox copyTiersCB;
     
     private JButton sortTopTreeButton;
     private JButton reverseTopTreeButton;
@@ -153,6 +156,8 @@ public class MergeStep2 extends StepPane implements ProgressListener, ActionList
                     "MergeTranscriptionDialog.Label.SelectTiers"));
         overwriteCB = new JCheckBox(ElanLocale.getString(
                     "MergeTranscriptionDialog.Label.Overwrite"));
+        copyTiersCB = new JCheckBox(ElanLocale.getString(
+        		"MergeTranscriptionDialog.Label.CopyAndRenameTiers"));
 
         // try trees instead of tables
         gridBagConstraints = new GridBagConstraints();
@@ -237,6 +242,10 @@ public class MergeStep2 extends StepPane implements ProgressListener, ActionList
 
         gridBagConstraints.gridy = 6;
         treePanel.add(overwriteCB, gridBagConstraints);
+        
+        copyTiersCB.addItemListener(new ItemSelListener());
+        gridBagConstraints.gridy = 7;
+        treePanel.add(copyTiersCB, gridBagConstraints);
     }
 
 	/**
@@ -482,6 +491,7 @@ public class MergeStep2 extends StepPane implements ProgressListener, ActionList
         setProgressUI();
 
         boolean overwrite = overwriteCB.isSelected();
+        boolean copyInsteadOfMerge = copyTiersCB.isSelected();
 
         List<String> tiersToAdd = new ArrayList<String>();
         DefaultMutableTreeNode root = (DefaultMutableTreeNode) secTree.getModel()
@@ -516,9 +526,10 @@ public class MergeStep2 extends StepPane implements ProgressListener, ActionList
         	secTrans.shiftAllAnnotations(givenTimeFrame);
         } 
         
-        // receiver is destination transcrption
+        // receiver is destination transcription
         Object[] args = new Object[] {
-                secTrans, destFileName, tiersToAdd, Boolean.valueOf(overwrite), Boolean.valueOf(addLinkedFiles) };
+                secTrans, destFileName, tiersToAdd, Boolean.valueOf(overwrite), 
+                Boolean.valueOf(addLinkedFiles), Boolean.valueOf(copyInsteadOfMerge) };
         com.execute(destTrans, args);
 
         // new Thread is started, return false
@@ -1099,6 +1110,16 @@ public class MergeStep2 extends StepPane implements ProgressListener, ActionList
         }
     }
 
+    class ItemSelListener implements ItemListener {
+
+		@Override
+		public void itemStateChanged(ItemEvent e) {
+			if (e.getSource() == copyTiersCB) {
+				overwriteCB.setEnabled(!copyTiersCB.isSelected());
+			}
+		}    	
+    }
+    
     /**
      * The loading of the transcription is done in a separate thread.
      * 

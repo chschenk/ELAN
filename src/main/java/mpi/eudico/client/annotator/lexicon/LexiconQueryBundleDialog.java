@@ -420,9 +420,7 @@ public class LexiconQueryBundleDialog extends ClosableDialog implements
 		LexiconIdentification lexId = null;
 		
 		if (lexLink == null) {// means lexiconName != null
-			lexId = new LexiconIdentification();			
-			lexId.setName(lexiconName);
-			lexId.setId(lexiconName);
+			lexId = new LexiconIdentification(lexiconName, lexiconName);			
 		} else {
 			lexId = lexLink.getLexId();
 		}
@@ -520,9 +518,7 @@ public class LexiconQueryBundleDialog extends ClosableDialog implements
 			
 			if (theLink == null) {
 				// situation of an automatically added LexiconComponent lexicon
-				LexiconIdentification lid = new LexiconIdentification();
-				lid.setId(linkName);
-				lid.setName(linkName);
+				LexiconIdentification lid = new LexiconIdentification(linkName, linkName);
 				theLink = new LexiconLink(linkName, LexiconComponentClient.CLIENT_TYPE, "", new LexiconComponentClient(), lid);
 				transcription.addLexiconLink(theLink);
 			}

@@ -204,7 +204,9 @@ public class EAF28 extends EAF27{
 		Element result;
 		
 		result = doc.createElement("LICENSE");
-		result.setAttribute("LICENSE_URL", licenseURL);				
+		if (licenseURL != null) {
+			result.setAttribute("LICENSE_URL", licenseURL);
+		}
 		result.appendChild(doc.createTextNode(license));			
 
 		return result;

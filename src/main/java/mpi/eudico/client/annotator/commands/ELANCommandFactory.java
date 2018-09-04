@@ -18,7 +18,7 @@ import mpi.eudico.server.corpora.clom.Transcription;
 
 /**
  * DOCUMENT ME!
- * $Id: ELANCommandFactory.java 46319 2017-12-05 16:20:41Z hasloe $
+ * $Id: ELANCommandFactory.java 46470 2018-07-25 12:44:50Z hasloe $
  * @author $Author$
  * @version $Revision$
  */
@@ -421,6 +421,7 @@ public class ELANCommandFactory {
 	public static final String CLIP_MEDIA_MULTI = "Menu.File.MultipleMediaClips";
 	public static final String MERGE_TIERS_MULTI = "Menu.File.MultipleFileMergeTiers";
 	public static final String UPDATE_TRANSCRIPTIONS_FOR_ECV = "Menu.File.MultiEAFECVUpdater";
+	public static final String UPDATE_TRANSCRIPTIONS_WITH_TEMPLATE = "Menu.File.MultipleFileUpdateWithTemplate";
 	
 	public static final String EDIT_LEX_SRVC_DLG = "Menu.Edit.EditLexSrvc";
 	public static final String ADD_LEX_LINK = "CommandActions.AddLexLink";

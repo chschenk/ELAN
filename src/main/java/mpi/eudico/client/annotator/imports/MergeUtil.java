@@ -3,19 +3,31 @@ package mpi.eudico.client.annotator.imports;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import mpi.eudico.client.annotator.util.ClientLogger;
+import static mpi.eudico.client.annotator.util.ClientLogger.LOG;
+import mpi.eudico.client.annotator.Preferences;
+import mpi.eudico.server.corpora.clom.ExternalReference;
 import mpi.eudico.server.corpora.clom.Tier;
 import mpi.eudico.server.corpora.clomimpl.abstr.TierImpl;
 import mpi.eudico.server.corpora.clomimpl.abstr.TranscriptionImpl;
 import mpi.eudico.server.corpora.clomimpl.type.Constraint;
 import mpi.eudico.server.corpora.clomimpl.type.ConstraintImpl;
 import mpi.eudico.server.corpora.clomimpl.type.LinguisticType;
+import mpi.eudico.server.corpora.lexicon.LexicalEntryFieldIdentification;
+import mpi.eudico.server.corpora.lexicon.LexiconIdentification;
+import mpi.eudico.server.corpora.lexicon.LexiconLink;
+import mpi.eudico.server.corpora.lexicon.LexiconQueryBundle2;
+import mpi.eudico.server.corpora.util.ProcessReport;
+import mpi.eudico.util.CVEntry;
 import mpi.eudico.util.ControlledVocabulary;
+import mpi.eudico.util.ExternalCV;
+import mpi.eudico.util.multilangcv.LangInfo;
 
 
 public class MergeUtil {
@@ -29,27 +41,22 @@ public class MergeUtil {
     public List<TierImpl> getAddableTiers(TranscriptionImpl srcTrans, TranscriptionImpl destTrans,
             List<String> selTiers) {
         if (srcTrans == null || destTrans == null) {
-        	ClientLogger.LOG.warning("A Transcription is null");
+        	LOG.warning("A Transcription is null");
             return new ArrayList<TierImpl>(0); 
         }
         if (selTiers == null) {
-            int size = srcTrans.getTiers().size();
-            selTiers = new ArrayList<String>(size);
-            Tier ti;
-            for (int i = 0; i < size; i++) {
-                ti = srcTrans.getTiers().get(i);
-                selTiers.add(ti.getName());
+            selTiers = new ArrayList<String>(srcTrans.getTiers().size());
+            for (Tier ti : srcTrans.getTiers()) {
+            	selTiers.add(ti.getName());
             }
         }
         List<TierImpl> validTiers = new ArrayList<TierImpl>(selTiers.size());
 
-        String name;
-        TierImpl t, t2;
         for (int i = 0; i < selTiers.size(); i++) {
-            name = selTiers.get(i);
-            t = srcTrans.getTierWithId(name);
+            String name = selTiers.get(i);
+            TierImpl t = srcTrans.getTierWithId(name);
             if (t != null) {
-                t2 = destTrans.getTierWithId(name);
+                TierImpl t2 = destTrans.getTierWithId(name);
                 if (t2 == null) { // not yet in destination
                     if (t.getParentTier() == null) {
                         // a toplevel tier can always be added
@@ -101,10 +108,10 @@ public class MergeUtil {
                     }
                 }
             } else {
-            	ClientLogger.LOG.warning("Tier " + name + " does not exist.");
+            	LOG.warning("Tier " + name + " does not exist.");
             }
             if (!validTiers.contains(t)) {
-            	ClientLogger.LOG.warning("Cannot add tier " + name);
+            	LOG.warning("Cannot add tier " + name);
             }
         }
         return validTiers;
@@ -128,7 +135,7 @@ public class MergeUtil {
                 if (lt.getConstraints().getStereoType() == lt2.getConstraints().getStereoType()) {
                     return true;
                 } else {
-                	ClientLogger.LOG.warning("Incompatible tier types in source and destination: " + t.getName());
+                	LOG.warning("Incompatible tier types in source and destination: " + t.getName());
                     return false;
                 }
             } else {
@@ -157,8 +164,6 @@ public class MergeUtil {
     	if (!constraintsCompatible(lType1.getConstraints(), lType2.getConstraints())) {
     		return false;
     	}
-    	
-    	// TODO check CV
     	
     	return true;
     }
@@ -257,7 +262,8 @@ public class MergeUtil {
      * Sort the tiers in the list hierarchically.
      * @param tiers the tiers
      */
-    public <T extends Tier> List<T> sortTiers(List<T> tiersToSort) {
+    @SuppressWarnings("unchecked")
+	public <T extends Tier> List<T> sortTiers(List<T> tiersToSort) {
         if (tiersToSort == null || tiersToSort.size() == 0) {
             return null;
         }
@@ -265,16 +271,16 @@ public class MergeUtil {
         DefaultMutableTreeNode sortedRootNode = new DefaultMutableTreeNode(
         "sortRoot");
         HashMap<Tier, DefaultMutableTreeNode> nodes = new HashMap<Tier, DefaultMutableTreeNode>();
-        Tier t = null;
+        
         for (int i = 0; i < tiersToSort.size(); i++) {
-            t = tiersToSort.get(i);
+        	Tier t = tiersToSort.get(i);
 
             DefaultMutableTreeNode node = new DefaultMutableTreeNode(t);
             nodes.put(t, node);
         }
 
         for (int i = 0; i < tiersToSort.size(); i++) {
-            t = tiersToSort.get(i);
+            Tier t = tiersToSort.get(i);
 
             if ((t.getParentTier() == null) ||
                     !tiersToSort.contains(t.getParentTier())) {
@@ -424,15 +430,15 @@ public class MergeUtil {
     public void addTiersTypesAndCVs(TranscriptionImpl srcTrans, TranscriptionImpl destTrans, 
             List<TierImpl> tiersToAdd) {
         if (srcTrans == null) {
-        	ClientLogger.LOG.warning("Source transcription is null.");
+        	LOG.warning("Source transcription is null.");
             return;
         }
         if (destTrans == null){
-        	ClientLogger.LOG.warning("Destination transcription is null");
+        	LOG.warning("Destination transcription is null");
             return;
         }
         if (tiersToAdd == null || tiersToAdd.size() == 0) {
-        	ClientLogger.LOG.warning("No tiers to add");
+        	LOG.warning("No tiers to add");
             return;
         }
 //        System.out.println("num tiers: " + tiersToAdd.size());
@@ -500,7 +506,7 @@ public class MergeUtil {
 
             if (cv2 == null) {
                 destTrans.addControlledVocabulary(cv);
-                ClientLogger.LOG.info("Added Controlled Vocabulary: " + cv.getName());
+                LOG.info("Added Controlled Vocabulary: " + cv.getName());
             } else if (!cv.equals(cv2)) {
                 // rename
                 String newCVName = cv.getName() + "-cp";
@@ -509,12 +515,12 @@ public class MergeUtil {
                     c++;
                 }
                 newCVName = newCVName + c;
-                ClientLogger.LOG.info("Renamed Controlled Vocabulary: " + cv.getName() +
+                LOG.info("Renamed Controlled Vocabulary: " + cv.getName() +
                     " to " + newCVName);
                 renamedCVS.put(cv.getName(), cv);
                 cv.setName(newCVName);
                 destTrans.addControlledVocabulary(cv);
-                ClientLogger.LOG.info("Added Controlled Vocabulary: " + cv.getName());
+                LOG.info("Added Controlled Vocabulary: " + cv.getName());
             }
         } // end cv
         // add linguistic types
@@ -532,12 +538,12 @@ public class MergeUtil {
             if (renamedTypes.containsKey(lt.getLinguisticTypeName())) {     
                 String newLTName = renamedTypes.get(lt.getLinguisticTypeName());
                 
-                ClientLogger.LOG.info("Renamed Linguistic Type: " +
+                LOG.info("Renamed Linguistic Type: " +
                             lt.getLinguisticTypeName() + " to " + newLTName);
                 lt.setLinguisticTypeName(newLTName);                           
             } 
             destTrans.addLinguisticType(lt);
-            ClientLogger.LOG.info("Added Linguistic Type: " +
+            LOG.info("Added Linguistic Type: " +
                         lt.getLinguisticTypeName());
 
         } // end linguistic types
@@ -569,7 +575,7 @@ public class MergeUtil {
                     newTier = new TierImpl(t2, t.getName(), t.getParticipant(),
                             destTrans, null);
                 } else {
-                	ClientLogger.LOG.warning("The parent tier: " + parentTierName +
+                	LOG.warning("The parent tier: " + parentTierName +
                         " for tier: " + t.getName() +
                         " was not found in the destination transcription");
                 }
@@ -582,10 +588,10 @@ public class MergeUtil {
                 if (lt2 != null) {                  
                     newTier.setLinguisticType(lt2);
                     destTrans.addTier(newTier);
-                    ClientLogger.LOG.info("Created and added tier to destination: " +
+                    LOG.info("Created and added tier to destination: " +
                             newTier.getName());
                 } else {
-                	ClientLogger.LOG.warning("Could not add tier: " + newTier.getName() +
+                	LOG.warning("Could not add tier: " + newTier.getName() +
                         " because the Linguistic Type was not found in the destination transcription.");
                 }
                 newTier.setDefaultLocale(t.getDefaultLocale());
@@ -595,5 +601,903 @@ public class MergeUtil {
         } //end tiers
     }
 
+    /**
+     * Checks which of the selected tiers is already present in the destination transcription
+     * and renames those tiers (and dependent tiers) in the source transcription. The renaming 
+     * is implemented as adding a number/renumbering.
+     * 
+     * Important note: the assumption is that the source transcription can be safely changed,  
+     * without undo etc.
+     * 
+     * @param srcTrans the transcription containing the tiers to add to the other transcription
+     * @param destTrans the transcription tier will be added to
+     * @param selTiers the (names of) the selected tiers
+     *  
+     * @return a map containing mappings from original name to modified name or to the same name if
+     * no renaming is required
+     */
+    public Map<String, String> getRenamingTierMap(TranscriptionImpl srcTrans, TranscriptionImpl destTrans,
+            List<String> selTiers) {
+        if (srcTrans == null || destTrans == null) {
+        	LOG.warning("A Transcription is null");
+            return new HashMap<String, String>(0); 
+        }
+        // add all tiers if no selection has been passed
+        if (selTiers == null) {
+            selTiers = new ArrayList<String>(srcTrans.getTiers().size());
+            for (Tier ti : srcTrans.getTiers()) {
+            	selTiers.add(ti.getName());
+            }
+        }
+        
+        HashMap<String, String> nameMap = new HashMap<String, String>();
+        final String HYPH = "-";
+        final String END_PAT = ".+" + HYPH + "[0-9]+$";
+        
+        for (String tName : selTiers) {
+        	// check if the tier was already processed as dependent tier of another tier
+        	if (nameMap.containsKey(tName)) {
+        		continue;
+        	}
+        	if (srcTrans.getTierWithId(tName) != null) {
+        		if (destTrans.getTierWithId(tName) != null) {
+        			int count = 1;
+        			// check pattern of tName, if it already has a -00 suffix
+        			String bareName = tName;
+        			if (tName.matches(END_PAT)) {
+        				String curNum = tName.substring(tName.lastIndexOf(HYPH) + 1);
+        				try {
+        					count = Integer.parseInt(curNum);
+        				} catch (NumberFormatException nfe) {}
+        				
+        				bareName = tName.substring(0, tName.lastIndexOf(HYPH));
+        			}
+        			
+        			for ( ; count <= 100; count++) {
+        				String nextTName = bareName + HYPH + count;
+        				if (destTrans.getTierWithId(nextTName) == null && !nameMap.containsValue(nextTName)) {
+        					nameMap.put(tName, nextTName);
+        					
+        					TierImpl t = destTrans.getTierWithId(tName);
+        					List<TierImpl> depTiers = t.getDependentTiers();
+        					// try to use the same suffix number for dependent tiers
+        					for (TierImpl ti : depTiers) {       						
+        						if (selTiers.contains(ti.getName())) {
+        							String bareDepName = ti.getName();
+        							if (bareDepName.matches(END_PAT)) {
+        								bareDepName = bareDepName.substring(0, bareDepName.lastIndexOf(HYPH));
+        							}
+        							String nextDepTierName = bareDepName + HYPH + count;
+        							if (destTrans.getTierWithId(nextDepTierName) == null && 
+        									!nameMap.containsValue(nextDepTierName)) {
+        								nameMap.put(ti.getName(), nextDepTierName);
+        							} else {
+        								// unexpected situation: tierA-2 doesn't exist but subtierA-2 exists
+        								// increment the count with a new counter
+        								int ncount = count + 1;
+        								for (; ncount<= 100; ncount++) {
+        									nextDepTierName = bareDepName + HYPH + ncount;
+        									if (destTrans.getTierWithId(nextDepTierName) == null && 
+        											!nameMap.containsValue(nextDepTierName)) {
+        										nameMap.put(ti.getName(), nextDepTierName);
+        										break;
+        									}
+        								}
+        							}
+        						}
+        					}
+        					// break the count loop
+        					break;
+        				}
+        			}
+        		} else {
+        			nameMap.put(tName, tName);
+        		}
+        	} else {
+        		nameMap.put(tName, tName);
+        	}
+        }
+        
+    	return nameMap;
+    }
     
+    // #### utility methods for updating items in one transcription (target) based on ####
+    // #### the items in another transcription (source, could be a template)          ####
+    /**
+     * Update a target controlled vocabulary in a target transcription based on the source 
+     * controlled vocabulary which is assumed to have the same ID (= name).
+     * New languages are added, descriptions are updated, new entries are added (this 
+     * concerns internal CV's), internal CV's are converted to external CV's and vice versa,
+     * url's of ECV's are updated.
+     * Entries that are in the target CV but not in the source are left untouched (unless 
+     * the forceReplace flag is true). 
+     * 
+     * @param srcTrans the transcription containing the source CV
+     * @param targetTrans the transcription that contains or will contain the target CV 
+     * @param cvName the name (id) of the Controlled Vocabulary to update
+     * @param forceReplace replace internal CV's completely and forcibly
+     * @param report if not null, messages will be added to the report
+     */
+    public void updateControlledVocabulary(TranscriptionImpl srcTrans, TranscriptionImpl targetTrans, String cvName, 
+    		boolean forceReplace, ProcessReport report) {
+        if (srcTrans == null) {
+        	LOG.warning("The source Transcription is null");
+        	return;
+        }
+        if (targetTrans == null) {
+        	LOG.warning("The target Transcription is null"); 
+        	return;
+        }
+
+        ControlledVocabulary srcCV = srcTrans.getControlledVocabulary(cvName);
+    	if (srcCV == null) {
+    		LOG.info(String.format("The source transcription does not contain a CV with name: \"%s\"", cvName));
+    		if (report != null) {
+    			report.append(String.format("The source does not contain a CV with name: \"%s\"", cvName));
+    		}
+    		return;
+    	}
+    	
+		ControlledVocabulary targetCV = targetTrans.getControlledVocabulary(cvName);
+		
+    	if (forceReplace) {
+    		ControlledVocabulary nextCV = srcCV.clone();
+    		if (targetCV != null) {
+	    		targetTrans.replaceControlledVocabulary(nextCV);
+	    		if (report != null) {
+	    			report.append(String.format("Performed a forced replace of target CV: \"%s\"", nextCV.getName()));
+	    		}
+    		} else {
+    			// targetCV is null, doesn't exist, add a copy
+    			targetTrans.addControlledVocabulary(nextCV);
+    			if (report != null) {
+    				report.append(String.format("Added new CV: \"%s\"", nextCV.getName()));
+    			}
+    		}
+    		return;
+    	}
+    	
+    	// update url of external CV, convert internal to external and vice versa
+    	if (srcCV instanceof ExternalCV) {
+    		ExternalCV srcECV = (ExternalCV) srcCV;
+    		
+    		if (targetCV instanceof ExternalCV) {
+    			ExternalCV targetECV = (ExternalCV) targetCV;
+    			if (srcECV.getExternalRef() != null) {
+    				if (targetECV.getExternalRef() != null) {
+    					if (srcECV.getExternalRef().getReferenceType() == 
+    							targetECV.getExternalRef().getReferenceType() && srcECV.getExternalRef().getValue() != null &&
+    							!srcECV.getExternalRef().getValue().equals(targetECV.getExternalRef().getValue())) {
+    						targetECV.getExternalRef().setValue(srcECV.getExternalRef().getValue());
+    						targetTrans.setChanged();// the ExternalReference object does not notify listeners of the change
+    						if (report != null) {
+    							report.append(String.format("Updated external URL of target CV \"%s\" to: \"%s\"", targetCV.getName(), 
+    									targetECV.getExternalRef().getValue()));
+    						}
+    					}
+    				} else {
+    					// should not happen, ExternalCV without ext.ref., but add the reference
+    					try {
+    						ExternalReference erf = srcECV.getExternalRef().clone();
+    						targetECV.setExternalRef(erf);
+    						targetTrans.setChanged();
+    						if (report != null) {
+    							report.append(String.format("Added external URL: \"%s\" to target CV: \"%s\"", 
+    									targetECV.getExternalRef().getValue(), targetCV.getName()));
+    						}
+    					} catch (CloneNotSupportedException cnse) {
+    						// report
+    						if (report != null) {
+    							report.append(String.format("Cannot clone external reference of CV: \"%s\"", 
+    									targetCV.getName()));
+    						}
+    					}   					
+    				}
+    			}// else sourceECV's ext.ref. is null, error situation
+    		} else if (targetCV != null) {
+    			// sourceCV is external, targetCV is internal, convert to external
+    			ExternalCV convertCV = new ExternalCV(srcECV); // copies external reference as well //or new ExternalCV(targetCV);
+    			targetTrans.replaceControlledVocabulary(convertCV);
+    			if (report != null) {
+    				report.append(String.format("Replaced internal CV by external CV: \"%s\"", srcECV.getName()));
+    			}
+    		} else {
+    			// targetCV is null, does nor exist, add a copy
+    			targetTrans.addControlledVocabulary(new ExternalCV(srcECV));
+    			if (report != null) {
+    				report.append(String.format("Added external CV: \"%s\"", srcECV.getName()));
+    			}
+    		}
+    	} else {
+    		// sourceCV is internal
+    		if (targetCV == null) {
+        		targetTrans.addControlledVocabulary(srcCV.clone());
+        		if (report != null) {
+        			report.append(String.format("Added internal CV: \"%s\"", srcCV.getName()));
+        		}
+        		return;
+    		} else if (targetCV instanceof ExternalCV) { // replace external by internal
+    			ControlledVocabulary convertCV = new ControlledVocabulary(srcCV.getName());
+    			convertCV.clone(srcCV);
+    			targetTrans.replaceControlledVocabulary(convertCV);
+    			targetCV = convertCV;
+    			if (report != null) {
+    				report.append(String.format("Replaced external CV by internal CV: \"%s\"", srcCV.getName()));
+    			}
+    			return;
+    		}
+    		
+    		// source and target are internal CV's
+    		int numSrcLanguages = srcCV.getNumberOfLanguages();
+    		int numTargetLanguages = targetCV.getNumberOfLanguages();
+    		
+    		if (numSrcLanguages == numTargetLanguages) {
+    			// assume that if there is a difference in languages, one or more have been updated/changed
+    			// rather than one deleted and another added
+    			for (int i = 0; i < numSrcLanguages; i++) {
+            		String lid = srcCV.getLanguageId(i);
+            		int index2 = targetCV.getIndexOfLanguage(lid);
+            		if (index2 < 0) {
+            			String curLid = targetCV.getLanguageId(i);
+            			if (srcCV.getIndexOfLanguage(curLid) < 0) {
+            				// assume replace/update of this index
+            				LangInfo lInfo = srcCV.getLangInfo(i);
+            				targetCV.setLanguageIds(i, lInfo.getId(), lInfo.getLongId(), lInfo.getLabel());
+            				if (report != null) {
+            					report.append(String.format("Changed Language of target CV: \"%s\", at index %d from \"%s\" to \"%s\"", 
+            							targetCV.getName(), i, curLid, lid ));
+            				}
+            				// check description
+                			if (srcCV.getDescription(i) != null && !srcCV.getDescription(i).equals(targetCV.getDescription(i))) {
+                				targetCV.setDescription(i, srcCV.getDescription(i));
+                				if (report != null) {
+                					report.append(String.format("Updated Description of target CV: \"%s\" at index %d to \"%s\"",
+                							targetCV.getName(), i, targetCV.getDescription(i)));
+                				}
+                			}
+            			} else {
+            				// the language currently at index i of the target is also there in the source but at different index
+            			}
+            		} else if (i == index2){
+            			// check description
+            			if (srcCV.getDescription(i) != null && !srcCV.getDescription(i).equals(targetCV.getDescription(i))) {
+            				targetCV.setDescription(i, srcCV.getDescription(i));
+            				if (report != null) {
+            					report.append(String.format("Updated Description of target CV: \"%s\" at index %d to \"%s\"",
+            							targetCV.getName(), i, targetCV.getDescription(index2)));
+            				}
+            			}
+            		} else {
+            			// the language at index i of the source is also there in the target but at different index
+            			// check description
+            			if (srcCV.getDescription(i) != null && !srcCV.getDescription(i).equals(targetCV.getDescription(index2))) {
+            				targetCV.setDescription(index2, srcCV.getDescription(i));
+            				if (report != null) {
+            					report.append(String.format("Updated Description of target CV: \"%s\" at index %d to \"%s\"",
+            							targetCV.getName(), index2, targetCV.getDescription(index2)));
+            				}
+            			}
+            		}
+    			}
+    		} else { // different number of languages		
+	        	// add languages, do not correct inconsistencies in language order, do not delete languages
+	        	for (int i = 0; i < numSrcLanguages; i++) {
+	        		String lid = srcCV.getLanguageId(i);
+	        		int index2 = targetCV.getIndexOfLanguage(lid);
+	        		if (index2 < 0) {
+	        			LangInfo langInfo = srcCV.getLangInfo(i);
+	        			int ni = targetCV.addLanguage(langInfo);// creates a copy
+	        			if (ni < 0) {
+	        				if (report != null) {
+	        					report.append(String.format("Failed to add Language: \"%s\" to target CV: \"%s\"", lid, targetCV.getName()));
+	        				}
+	        				continue;
+	        			} else {
+	        				index2 = ni;
+	        				if (report != null) {
+	        					report.append(String.format("Added Language: \"%s\" to target CV: \"%s\"", lid, targetCV.getName()));
+	        				}
+	        			}
+	        		}
+	        		// check description
+	        		if (index2 >= 0) {
+	        			if (srcCV.getDescription(i) != null && !srcCV.getDescription(i).equals(targetCV.getDescription(index2))) {
+	        				targetCV.setDescription(index2, srcCV.getDescription(i));
+	        				if (report != null) {
+	        					report.append(String.format("Updated Description of target CV: \"%s\"  at index %d to \"%s\"", 
+	        							targetCV.getName(), index2, targetCV.getDescription(index2)));
+	        				}
+	        			}
+	        		}
+	        	}
+    		}
+        	
+        	// update with new CV Entries??
+        	if (!srcCV.equals(targetCV)) { // this equals ignores differences in order and ignores id's 
+        		Iterator<CVEntry> entryIt = srcCV.iterator();
+        		int numAdded = 0;
+        		int numLangValueAdded = 0;
+        		
+        		while (entryIt.hasNext()) {
+        			CVEntry entry = entryIt.next();
+        			CVEntry tarEntry = targetCV.getEntrybyId(entry.getId());
+        			if (tarEntry == null) {
+        				targetCV.addEntry(new CVEntry(targetCV, entry));
+        				numAdded++;
+        			} else {
+        				for (int i = 0; i < numSrcLanguages; i++) {
+        					String sv = entry.getValue(i);
+        					int index2 = targetCV.getIndexOfLanguage(srcCV.getLanguageId(i));
+        					if (index2 >= 0) {
+        						String tv = tarEntry.getValue(index2);
+        						if (tv == null || !sv.equals(tv)) {
+        							tarEntry.setValue(index2, sv);
+        							targetTrans.setChanged();
+        							numLangValueAdded++;
+        							
+        							// entry description
+        							String srcDesc = entry.getDescription(i);
+        							if (srcDesc != null && !srcDesc.equals(tarEntry.getDescription(index2))) {
+        								tarEntry.setDescription(index2, srcDesc);
+        							}
+        							// entry external ref
+        							if (entry.getExternalRef() != null && !entry.getExternalRef().equals(tarEntry.getExternalRef())) {
+        								try {
+        									tarEntry.setExternalRef(entry.getExternalRef().clone());
+        								} catch (CloneNotSupportedException cnse) {
+        									// log?
+        								}
+        							}
+        						}
+        					}
+        				}
+        			}
+        		}
+        		if (report != null) {
+        			if (numAdded > 0) {
+	        			report.append(String.format("Added %d entries to target CV: \"%s\"", 
+	        					numAdded, targetCV.getName()));
+        			}
+        			if (numLangValueAdded > 0) {
+        				// and added or updated %d entry values
+        				report.append(String.format("Added or updated %d entry values to target CV: \"%s\"", 
+        						numLangValueAdded, targetCV.getName()));
+        			}
+        		}
+        	}
+    	}    	
+    }
+    
+    /**
+     * Updates or adds a tier type in the target transcription based on the attributes 
+     * and properties of the same type (with the same name or id) in the source transcription.
+     * The Stereotype of a tier type will not be updated because that could lead to inconsistencies
+     * and data loss.
+     * The association with a CV, a lexicon and lexical entry field and with a data category
+     * are updated (including setting to null if tha is the case in the source).
+     * 
+     * @param srcTrans the transcription containing the source type
+     * @param targetTrans the transcription to be updated
+     * @param typeName the name of the tier type
+     * @param report if not null, messages will be added to this report
+     */
+    public void updateTierType(TranscriptionImpl srcTrans, TranscriptionImpl targetTrans, String typeName, 
+    		ProcessReport report) {
+        if (srcTrans == null) {
+        	LOG.warning("The source Transcription is null");
+        	return;
+        }
+        if (targetTrans == null) {
+        	LOG.warning("The target Transcription is null"); 
+        	return;
+        }
+        
+        LinguisticType srcType = srcTrans.getLinguisticTypeByName(typeName);
+        if (srcType == null) {
+        	LOG.info("The source transcription does not contain a Tier Type with name: " + typeName);
+        	return;
+        }
+        boolean changed = false;
+        LinguisticType targetType = targetTrans.getLinguisticTypeByName(typeName);
+        
+        if (targetType != null) {
+        	// update the type as much as possible
+        	int srcStereo = srcType.getConstraints() == null ? -1 : srcType.getConstraints().getStereoType();
+        	int tarStereo = targetType.getConstraints() == null ? -1 : targetType.getConstraints().getStereoType();
+        	if (srcStereo != tarStereo) {
+        		LOG.info(String.format("Incompatible stereotypes of Tier Type: \"%s\", cannot update the stereotype", typeName));
+        		if (report != null) {
+        			report.append(String.format("Incompatible stereotypes of Tier Type: \"%s\", cannot update the stereotype", typeName));
+        		}
+        	}
+        	// check CV
+        	if (srcType.isUsingControlledVocabulary()) {
+        		if (!srcType.getControlledVocabularyName().equals(targetType.getControlledVocabularyName())) {
+        			if (targetTrans.getControlledVocabulary(srcType.getControlledVocabularyName()) != null) {
+        				targetType.setControlledVocabularyName(srcType.getControlledVocabularyName());
+        				changed = true;
+        				if (report != null) {
+        					report.append(String.format("Changed the CV of Type \"%s\" to: \"%s\"", typeName, srcType.getControlledVocabularyName()));
+        				}
+        			} else {
+        				if (report != null) {
+        					report.append(String.format("Cannot change the CV of Type \"%s\" to: \"%s\"; the CV does not exist in target", 
+        							typeName, srcType.getControlledVocabularyName()));
+        				}
+        			}
+        		}// else already equal
+        	} else {
+        		if (targetType.isUsingControlledVocabulary()) {
+        			String oldCV = targetType.getControlledVocabularyName();
+        			targetType.setControlledVocabularyName(null);
+        			changed = true;
+        			if (report != null) {
+        				report.append(String.format("Removed the CV from Type \"%s\" (was: \"%s\")", typeName, oldCV));
+        			}
+        		}
+        	}
+        	// update Data Category
+        	if (srcType.getDataCategory() != null) {
+        		if (!srcType.getDataCategory().equals(targetType.getDataCategory())) {
+        			targetType.setDataCategory(srcType.getDataCategory());
+        			changed = true;
+        			if (report != null) {
+        				report.append(String.format("Changed the Data Category of Type \"%s\" to: \"%s\"", typeName, srcType.getDataCategory()));
+        			}
+        		}
+        	} else {
+        		if (targetType.getDataCategory() != null) {
+        			String oldDC = targetType.getDataCategory();
+        			targetType.setDataCategory(null);
+        			changed = true;
+        			if (report != null) {
+        				report.append(String.format("Removed the Data Category of Type \"%s\" (was: \"%s\")", typeName, oldDC));
+        			}
+        		}
+        	}
+        	// update lexicon link, lexicon query bundle
+        	if (srcType.getLexiconQueryBundle() != null) {
+        		LexiconQueryBundle2 srcBundle = srcType.getLexiconQueryBundle();
+        		if (targetType.getLexiconQueryBundle() == null) {
+        			// add a copy using the copy constructor
+        			targetType.setLexiconQueryBundle(
+        					new LexiconQueryBundle2(srcBundle));
+        			changed = true;
+        			if (report != null) {
+        				report.append(String.format("Added a Lexicon Link to Type \"%s\": \"%s\"", typeName, srcBundle.getLinkName()));
+        			}
+        		} else {
+        			// update differences, or completely replace
+        			boolean bundleChange = false;
+        			boolean copySrcLEFI = false;
+        			boolean copySrcLL = false;
+        			
+        			LexiconQueryBundle2 targetBundle = targetType.getLexiconQueryBundle(); 
+        			
+        			LexicalEntryFieldIdentification srcLefi = srcBundle.getFldId();
+        			LexicalEntryFieldIdentification tarLefi = targetBundle.getFldId();
+        			
+        			if (srcLefi != null) {
+        				if (tarLefi != null) {
+        					// don't set ID or name to null if it isn't null in the target
+        					if (srcLefi.getId() != null && !srcLefi.getId().equals(tarLefi.getId())) {
+        						tarLefi.setId(srcLefi.getId());
+        						bundleChange = true;
+        					}
+        					if (srcLefi.getName() != null && !srcLefi.getName().equals(tarLefi.getName())) {
+        						tarLefi.setName(srcLefi.getName());
+        						bundleChange = true;
+        					}
+        					if ((srcLefi.getDescription() == null && tarLefi.getDescription() != null) ||
+        							(srcLefi.getDescription() != null && !srcLefi.getDescription().equals(tarLefi.getDescription()))) {
+        						tarLefi.setDescription(srcLefi.getDescription());
+        						bundleChange = true;
+        					}
+        				} else {
+        					// create a new bundle with a copy of the LexicalEntryFieldIdentification?
+        					copySrcLEFI = true;
+        				}
+        			} else { // the src lex id is null, apply to the target?
+        				if (tarLefi != null) {
+        					copySrcLEFI = true;// set to null 
+        				}
+        			}
+        			
+        			LexiconLink srcLL = srcBundle.getLink();
+        			LexiconLink tarLL = targetBundle.getLink();
+        			// compare LexiconIdentification, name and URL
+        			if (srcLL != null) {
+        				if (tarLL != null) {
+        					LexiconIdentification srcLI = srcLL.getLexId();
+        					LexiconIdentification tarLI = tarLL.getLexId();
+        					
+        					if (srcLI != null && tarLI != null) {
+        						if (srcLI.getId() != null && !srcLI.getId().equals(tarLI.getId())) {
+        							tarLI.setId(srcLI.getId());
+        							bundleChange = true;
+        						}
+        						if (srcLI.getName() != null && !srcLI.getName().equals(tarLI.getName())) {
+        							tarLI.setName(srcLI.getName());
+        							bundleChange = true;
+        						}
+        						if ((srcLI.getDescription() == null && tarLI.getDescription() != null) ||
+        								(srcLI.getDescription() != null && !srcLI.getDescription().equals(
+        										tarLI.getDescription()))) {
+        							tarLI.setDescription(srcLI.getDescription());
+        							bundleChange = true;
+        						}
+        					}
+                			// compare name
+        					if (srcLL.getName() != null && !srcLL.getName().equals(tarLL.getName())) {
+        						tarLL.setName(srcLL.getName());
+        						bundleChange = true;
+        					}
+        					// compare URL
+        					if (srcLL.getUrl() != null && !srcLL.getUrl().equals(tarLL.getUrl())) {
+        						tarLL.setUrl(srcLL.getUrl());
+        						bundleChange = true;
+        					}
+        				} else {// targetLL == null
+        					copySrcLL = true;
+        				}
+        			} else {//source lexicon link is null, apply to target? 
+        				if (tarLL != null) {
+        					copySrcLL = true;
+        				}
+        			}    			
+        			
+        			// update or replace bundle
+        			if (copySrcLEFI || copySrcLL) {
+        				LexicalEntryFieldIdentification nextLefi = null;
+        				LexiconLink nextLL = null;
+        				
+        				if (copySrcLEFI) {
+        					if (srcLefi != null) {
+        						nextLefi = new LexicalEntryFieldIdentification(srcLefi.getId(), srcLefi.getName());
+        						nextLefi.setDescription(srcLefi.getDescription());
+        					}
+        				}
+        				if (copySrcLL) {
+        					if (srcLL != null) {
+        						nextLL = new LexiconLink(srcLL.getName(), srcLL.getLexSrvcClntType(), 
+        								srcLL.getUrl(), null, 
+        								srcLL.getLexId() == null ? null : new LexiconIdentification(srcLL.getLexId()));
+        					}
+        				}
+        				
+        				LexiconQueryBundle2 nextBundle = new LexiconQueryBundle2(nextLL, nextLefi);
+        				targetType.setLexiconQueryBundle(nextBundle);
+        				bundleChange = true;
+        			}
+        			
+        			if (bundleChange) {
+        				changed = true;
+        				if (report != null) {
+        					report.append(String.format("Changed the Lexicon Link of Type \"%s\"", typeName));
+        				}
+        			}
+        		}
+        	} else { // no lexicon link in source, remove from target?
+        		if (targetType.getLexiconQueryBundle() != null) {
+        			String oldName = targetType.getLexiconQueryBundle().getLinkName();
+        			targetType.setLexiconQueryBundle(null);
+    				changed = true;
+    				if (report != null) {
+    					report.append(String.format("Removed the Lexicon Link of Type \"%s\" (was: \"%s\")", typeName, oldName));
+    				}
+        		}
+        	}
+        } else {
+        	//type not there yet, add a copy to the target transcription
+        	LinguisticType nextLt = new LinguisticType(typeName, srcType);
+        	targetTrans.addLinguisticType(nextLt);
+        	changed = true;
+        	if (report != null) {
+        		report.append(String.format("Added Type \"%s\" to target" , typeName));
+        	}
+        }
+        
+		if (changed) {
+			targetTrans.setChanged();
+		}
+    }
+    
+    /**
+     * Updates the target tier in the target transcription based on properties 
+     * of the source tier.
+     * A few properties will not be updated: the parent tier of the target 
+     * tier (this could potentially result in deletion of annotations) and the 
+     * tier type in case the Stereotype of the source tier and target tier are
+     * different. 
+     * 
+     * @param srcTrans the transcription containing the source tier
+     * @param targetTrans the transcription containing the target tier
+     * @param tierName the name of the tier to update
+     * @param report if not null, messages will be added to this report
+     */
+    public void updateTier(TranscriptionImpl srcTrans, TranscriptionImpl targetTrans, String tierName, 
+    		ProcessReport report) {
+        if (srcTrans == null) {
+        	LOG.warning("The source Transcription is null");
+        	return;
+        }
+        if (targetTrans == null) {
+        	LOG.warning("The target Transcription is null"); 
+        	return;
+        }
+        
+        TierImpl srcTier = srcTrans.getTierWithId(tierName);
+        if (srcTier == null) {
+        	LOG.info("The source transcription does not contain a Tier with name: " + tierName);
+        	return;
+        }
+        
+        TierImpl targetTier = targetTrans.getTierWithId(tierName);
+        if (targetTier == null) {
+        	LOG.info("The target transcription does not contain a Tier with name: " + tierName);
+        	return;
+        }
+        
+        // check parent names; if different, report that this can not be updated
+        TierImpl srcParTier = srcTier.getParentTier();
+        TierImpl tarParTier = targetTier.getParentTier();
+        if ( (srcParTier == null && tarParTier != null) || 
+        		(srcParTier != null && (tarParTier == null || !srcParTier.getName().equals(tarParTier.getName()))) ) {
+        	if (report != null) {
+        		report.append(String.format(
+        				"Incompatible Tier hierarchy of source (parent = \"%s\") and target (parent = \"%s\"), cannot update", 
+        				(srcParTier == null ? "none" : srcParTier.getName()), 
+        				(tarParTier == null ? "none" : tarParTier.getName()) ));
+        	}
+        }
+        // check tier type
+        LinguisticType srcType = srcTier.getLinguisticType();
+        LinguisticType tarType = targetTier.getLinguisticType();
+        if (srcType.getLinguisticTypeName().equals(tarType.getLinguisticTypeName())) {
+        	// same type name, ignore
+        } else if (constraintsCompatible(srcType.getConstraints(), tarType.getConstraints())) {
+        	LinguisticType nextType = targetTrans.getLinguisticTypeByName(srcType.getLinguisticTypeName());
+        	if (nextType != null) {
+        		targetTier.setLinguisticType(nextType);
+        		if (report != null) {
+        			report.append(String.format("Changed the Type of Tier \"%s\" to \"%s\"", tierName, 
+        					nextType.getLinguisticTypeName()));
+        		}
+        	} else {
+        		// this shouldn't happen in the scenario where first CV's, types and then tiers are added/updated.
+        		// in principle the missing type could be added the transcription here first
+        		if (report != null) {
+        			report.append(String.format("Cannot change the Type of Tier \"%s\" to \"%s\", the Tier Type is not in the target", 
+        					tierName, srcType.getLinguisticTypeName()));
+        		}
+        	}
+        } else {
+        	if (report != null) {
+        		report.append(String.format("Incompatible Type of source (\"%s\") and target (\"%s\") Tier, cannot change the Type", 
+        				ConstraintImpl.getStereoTypeName(
+        						srcType.getConstraints() == null ? -1 : srcType.getConstraints().getStereoType()), 
+        				ConstraintImpl.getStereoTypeName(
+        						tarType.getConstraints() == null ? -1 : tarType.getConstraints().getStereoType()) ));
+        	}
+        }
+        // check participant
+        if (srcTier.getParticipant() != null && !srcTier.getParticipant().equals(targetTier.getParticipant())) {
+        	targetTier.setParticipant(srcTier.getParticipant());
+        	if (report != null) {
+        		report.append(String.format("Changed the Participant of Tier \"%s\" to \"%s\"", tierName, srcTier.getParticipant()));
+        	}
+        }
+        // annotator
+        if (srcTier.getAnnotator() != null && !srcTier.getAnnotator().equals(targetTier.getAnnotator())) {
+        	targetTier.setAnnotator(srcTier.getAnnotator());
+        	if (report != null) {
+        		report.append(String.format("Changed the Annotator of Tier \"%s\" to \"%s\"", tierName, srcTier.getAnnotator()));
+        	}
+        }
+        // content language, uses short language id as a reference
+        if (srcTier.getLangRef() != null && !srcTier.getLangRef().equals(targetTier.getLangRef())) {
+        	targetTier.setLangRef(srcTier.getLangRef());
+        	if (report != null) {
+        		report.append(String.format("Changed the Content Language of Tier \"%s\" to \"%s\"", tierName, srcTier.getLangRef()));
+        	}
+        }
+        // locale
+        if (srcTier.getDefaultLocale() != null && !srcTier.getDefaultLocale().equals(targetTier.getDefaultLocale())) {
+        	targetTier.setDefaultLocale(srcTier.getDefaultLocale()); // Locale is immutable, no need to clone
+        	if (report != null) {
+        		report.append(String.format("Changed the Locale (Input Method) of Tier \"%s\" to \"%s\"", 
+        				tierName, srcTier.getDefaultLocale().toString()));
+        	}
+        } else if (srcTier.getDefaultLocale() == null && targetTier.getDefaultLocale() != null) {
+        	Locale oldLoc = targetTier.getDefaultLocale();
+        	targetTier.setDefaultLocale(null);
+        	if (report != null) {
+        		report.append(String.format("Removed the Locale (Input Method) of Tier \"%s\" (was \"%s\")", 
+        				tierName, oldLoc.toString()));
+        	}
+        }
+    }
+    
+    /**
+     * Adds new tiers to the target transcription. It is assumed that checks have been performed
+     * before to ensure that the tiers in the list are not yet present in the target (but it is
+     * double checked here). It is also assumed that necessary tier types have been added 
+     * beforehand, but it is double checked here, including some checks on the compatibility 
+     * of tier types.  
+     * 
+     * @param srcTrans the transcription containing the source tiers
+     * @param targetTrans the target transcription
+     * @param newTiersNames a list of names of tiers to add 
+     * @param report if not null, messages will be added to this report
+     */
+    public void updateWithNewTiers(TranscriptionImpl srcTrans, TranscriptionImpl targetTrans, 
+    		List<String> newTiersNames, ProcessReport report) {
+        if (srcTrans == null) {
+        	LOG.warning("The source Transcription is null");
+        	return;
+        }
+        if (targetTrans == null) {
+        	LOG.warning("The target Transcription is null"); 
+        	return;
+        }
+        if (newTiersNames == null || newTiersNames.isEmpty()) {
+        	LOG.warning("The list of tiers to add is null or empty"); 
+        	return;
+        }
+        
+        List<TierImpl> tiersToAdd = new ArrayList<TierImpl>(newTiersNames.size());
+        for (String s : newTiersNames) {
+        	TierImpl tta = srcTrans.getTierWithId(s);
+        	if (tta != null) {
+        		tiersToAdd.add(tta);
+        	}
+        }
+        // sort the tiers hierarchical, add the top level tiers first
+        tiersToAdd = sortTiers(tiersToAdd);
+        // add the tiers in this order
+        for (TierImpl t : tiersToAdd) {
+        	TierImpl tarTier = targetTrans.getTierWithId(t.getName());
+        	
+        	if (tarTier != null) {
+        		if (report != null) {
+        			report.append(String.format("Cannot add Tier \"%s\" to target, it is already there", 
+        					t.getName()));
+        		}
+        		continue;
+        	}
+        	
+        	if (t.hasParentTier()) {
+        		TierImpl tarParent = targetTrans.getTierWithId(t.getParentTier().getName());
+        		if (tarParent == null) {
+            		if (report != null) {
+            			report.append(String.format("Cannot add Tier \"%s\" to target, the target Parent Tier \"%s\" is not there", 
+            					t.getName(), t.getParentTier().getName()));
+            		}
+        			continue;
+        		}
+        		LinguisticType type = targetTrans.getLinguisticTypeByName(
+        				t.getLinguisticType().getLinguisticTypeName());
+        		if (type == null) {
+            		if (report != null) {
+            			report.append(String.format("Cannot add Tier \"%s\" to target, the Tier Type \"%s\" is not there", 
+            					t.getName(), t.getLinguisticType().getLinguisticTypeName()));
+            		}
+        			continue;
+        		} else {
+        			if (!parentChildTypeCompatible(tarParent.getLinguisticType(), type)) {
+                		if (report != null) {
+                			report.append(String.format("Cannot add Tier \"%s\" to target, the Tier Type \"%s\" "
+                					+ "is not compatible with the Type of the Parent Tier", 
+                					t.getName(), type.getLinguisticTypeName()));
+                		}
+            			continue;
+        			}
+        		}
+        		
+        		tarTier = new TierImpl(tarParent, t.getName(), t.getParticipant(), targetTrans, type);
+        		tarTier.setAnnotator(t.getAnnotator());
+        		tarTier.setDefaultLocale(t.getDefaultLocale());
+        		tarTier.setLangRef(t.getLangRef());
+        		tarTier.setExtRef(t.getExtRef());
+        		
+        		targetTrans.addTier(tarTier);
+        	} else {// no parent, top level tier
+        		LinguisticType type = targetTrans.getLinguisticTypeByName(
+        				t.getLinguisticType().getLinguisticTypeName());
+        		if (type == null) {
+            		if (report != null) {
+            			report.append(String.format("Cannot add Tier \"%s\" to target, the Tier Type \"%s\"is not there", 
+            					t.getName(), t.getLinguisticType().getLinguisticTypeName()));
+            		}
+        			continue;
+        		} else {
+        			if (type.hasConstraints()) {
+                		if (report != null) {
+                			report.append(String.format("Cannot add Tier \"%s\" to target, the Tier Type \"%s\" "
+                					+ "has constraints and cannot be used for a Tier without a Parent", 
+                					t.getName(), type.getLinguisticTypeName()));
+                		}
+            			continue;
+        			}
+        		}
+        		tarTier = new TierImpl(t.getName(), t.getParticipant(), targetTrans, type);
+        		tarTier.setAnnotator(t.getAnnotator());
+        		tarTier.setDefaultLocale(t.getDefaultLocale());
+        		tarTier.setLangRef(t.getLangRef());
+        		tarTier.setExtRef(t.getExtRef());
+        		
+        		targetTrans.addTier(tarTier);
+        	}
+        	// the target tier should be non null here
+        	if (report != null) {
+        		report.append(String.format("Added Tier \"%s\" to target", tarTier.getName()));
+        	}
+        }
+    }
+    
+    /**
+     * Method to update the preferences of the target transcription with part of the preferences
+     * of the source transcription. 
+     *  
+     * @param srcTrans the source transcription
+     * @param targetTrans the target transcription
+     * @param prefKeys the keys of preferences to copy (e.g. specific fonts, 
+     * font sizes and colors)
+     */
+	public void updatePreferences(TranscriptionImpl srcTrans, TranscriptionImpl targetTrans, 
+			String... prefKeys ) {
+        if (srcTrans == null) {
+        	LOG.warning("The source Transcription is null");
+        	return;
+        }
+        if (targetTrans == null) {
+        	LOG.warning("The target Transcription is null"); 
+        	return;
+        }
+        
+        Map<String, Object> srcPrefs = Preferences.getPreferencesFor(srcTrans);
+        if (srcPrefs == null || !srcPrefs.isEmpty()) {
+        	LOG.info("There are no source preferences");
+        	return;
+        }
+        
+        updatePreferences(targetTrans, srcPrefs, prefKeys);
+	}
+	
+	/**
+     * Method to update the preferences of the target transcription with part of the 
+     * preferences present in the specified map.
+     * 
+	 * @param targetTrans the target transcription
+	 * @param srcPrefs the loaded preferences of a source transcription
+	 * @param prefKeys the keys of preferences to copy (e.g. specific fonts, 
+	 * font sizes and colors)
+	 */
+	public void updatePreferences(TranscriptionImpl targetTrans, Map<String, Object> srcPrefs,
+			String... prefKeys ) {
+        if (targetTrans == null) {
+        	LOG.warning("The target Transcription is null"); 
+        	return;
+        }
+        if (srcPrefs == null || srcPrefs.isEmpty()) {
+        	LOG.info("There are no source preferences");
+        	return;
+        }
+        
+        Map<String, Object> targetPrefs = Preferences.getPreferencesFor(targetTrans);
+        if (targetPrefs == null) {
+        	targetPrefs = new HashMap<String, Object>();
+        }
+        
+        if (prefKeys == null) {
+        	// replace or import all
+        	targetPrefs.putAll(srcPrefs);
+        } else {
+        	for (String s : prefKeys) {
+        		targetPrefs.put(s, srcPrefs.get(s));
+        	}
+        }
+        
+        Preferences.importPreferences(targetTrans, targetPrefs);
+	}
 }

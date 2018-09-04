@@ -37,6 +37,7 @@ public class UpdateTranscriptionsForECVCommand implements Command, ProcessReport
 	 * <li>arg[1] = the path to an output folder, if null the source folder is the destination folder (String)</li>
 	 * <li>arg[2] = flag for recursive processing (Boolean)</li>
 	 * <li>arg[3] = language</li>
+	 * <li>arg[4] = flag for letting the annotation values take precedence over a CVEntry reference (Boolean, optional)</li>
 	 * </ul>
 	 */
 	@Override
@@ -50,7 +51,10 @@ public class UpdateTranscriptionsForECVCommand implements Command, ProcessReport
 		report("Start processing...");
 		
 		corpusECVUpdater = new CorpusECVUpdater(this, (ProgressListener) receiver);
-		corpusECVUpdater.setRecursive((Boolean) arguments[2]); 
+		corpusECVUpdater.setRecursive((Boolean) arguments[2]);
+		if (arguments.length >= 5) {
+			corpusECVUpdater.setAnnotationValuePrecedence((Boolean) arguments[4]);
+		}
 		int success = corpusECVUpdater.updateFiles(new String[]{(String) arguments[0], (String) arguments[1]}, (String) arguments[3]);
 		
 		String status = "No errors occurred.";

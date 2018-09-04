@@ -974,9 +974,8 @@ public class ACM28TranscriptionStore implements TranscriptionStore, ServerLogger
         		// First try to create a client
         		//HashMap<String, LexiconServiceClientFactory> factories = attisTr.getLexiconServiceClientFactories();
         		//LexiconServiceClientFactory clientFactory = factories.get(contents.getType());
-        		LexiconIdentification lexiconIdentification = new LexiconIdentification();
-        		lexiconIdentification.setId(contents.getLexiconId());
-        		lexiconIdentification.setName(contents.getLexiconName());
+        		LexiconIdentification lexiconIdentification = new LexiconIdentification(
+        				contents.getLexiconId(), contents.getLexiconName());
 //        		LexiconServiceClient client = null;
 //        		if(clientFactory == null) {
 //        			client = null;

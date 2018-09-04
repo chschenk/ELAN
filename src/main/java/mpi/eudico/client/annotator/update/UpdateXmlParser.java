@@ -144,7 +144,11 @@ public class UpdateXmlParser {
             // the filepath: try to create an InputSource for the parser
             // HS Mar 2007: depending on Xerces version a SAXException or an IOException 
             // is thrown in such case
-            retryParsing();
+            if (fileName != null) {
+            	retryParsing();
+            } else {
+            	throw new ParseException(sax.getMessage(), sax.getCause());
+            }
         } catch (IOException ioe) {
             System.out.println("IO error: " + ioe.getMessage());
 
@@ -152,9 +156,15 @@ public class UpdateXmlParser {
             // the filepath: try to create an InputSource for the parser
             // HS Mar 2007: depending on Xerces version a SAXException or an IOException 
             // is thrown in such case
-            retryParsing();
+            if (fileName != null) {
+            	retryParsing();
+            } else {
+            	throw new ParseException(ioe.getMessage(), ioe.getCause());
+            }
         } catch (Exception e) {
         	throw new ParseException(e.getMessage(), e.getCause());
+        } catch (Throwable t) {
+        	throw new ParseException(t.getMessage(), t.getCause());
         }
     }
     

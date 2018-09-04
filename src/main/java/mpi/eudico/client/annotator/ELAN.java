@@ -35,7 +35,7 @@ public class ELAN {
     public static int major = 5;
 
     /** the minor version value */
-    public static int minor = 2;
+    public static int minor = 3;
 
     /** the micro (bug fix) version value
      *  No longer used as of ELAN 5.0, Oct 2017 */
@@ -166,14 +166,7 @@ public class ELAN {
             }
         }
         /*
-        Properties props = System.getProperties();
-        Iterator prIt = props.keySet().iterator();
-        String key, value;
-        while (prIt.hasNext()) {
-        	key = (String) prIt.next();
-        	value = props.getProperty(key);
-        	System.out.println("K: " + key + " V: " + value);
-        }
+		printSystemProperties();
         */
     }
 
@@ -326,7 +319,12 @@ public class ELAN {
 				defFontSize != Constants.DEFAULTFONT.getSize()) {
 			Constants.setDefaultFont(defFontName, defFontSize);
 		}
-		
+		// on high resolution displays a font scaling factor might be estimated automatically
+		boolean allowAutoScaling = true;
+		String autoScalingProp = System.getProperty("ELAN.UI.AutoDetectFontScaleFactor");
+		if (autoScalingProp != null) {
+			allowAutoScaling = Boolean.valueOf(autoScalingProp);
+		}
 		// first try the "launch properties"  file
 		String fontScaleFactorProp = System.getProperty("ELAN.UI.FontScaleFactor");
 		float scaleFactor = 1.0f;// -> load from preference or properties
@@ -346,12 +344,24 @@ public class ELAN {
         	if (prefScaleFactor != null) {
         		scaleFactor = prefScaleFactor.floatValue();
         		if (scaleFactor == 1) {
-        			// don't change anything
-        			return; 
+        			// check the screen resolution and calculate the scale factor
+        			int screenRes = SystemReporting.getScreenResolution();
+        			if (screenRes > Constants.LOW_RES_SCREEN_DPI && allowAutoScaling) {
+        				scaleFactor = screenRes / (float) Constants.LOW_RES_SCREEN_DPI;
+        			} else {
+        				// don't change anything
+        				return; 
+        			}
         		}
         	} else {
-        		// don't change anything
-        		return;
+    			// check the screen resolution and calculate the scale factor
+    			int screenRes = SystemReporting.getScreenResolution();
+    			if (screenRes > Constants.LOW_RES_SCREEN_DPI && allowAutoScaling) {
+    				scaleFactor = screenRes / (float) Constants.LOW_RES_SCREEN_DPI;
+    			} else {
+    				// don't change anything
+    				return; 
+    			}
         	}
         }	
 		
@@ -455,6 +465,13 @@ public class ELAN {
     	sb.append(String.format("User dir: \t%s\n", System.getProperty("user.dir")));
     	sb.append(String.format("Classpath: \t%s\n", System.getProperty("java.class.path")));
     	sb.append(String.format("Library path: \t%s\n", System.getProperty("java.library.path")));
+    	List<String> screenInfo = SystemReporting.getScreenInfo();
+    	if (screenInfo != null && !screenInfo.isEmpty()) {
+    		sb.append("Display info:\n");
+    		for (String s : screenInfo) {
+    			sb.append(String.format("\t%s\n", s));
+    		}
+    	}
     	return sb.toString();
     }
     
@@ -475,5 +492,16 @@ public class ELAN {
         }
     }
     */
-    
+    /*
+    public static void printSystemProperties() {
+        Properties props = System.getProperties();
+        Iterator<String> prIt = props.stringPropertyNames().iterator();
+        System.out.println("- property name = property value - ");
+        while (prIt.hasNext()) {
+        	String key = prIt.next();
+        	String value = props.getProperty(key);
+        	System.out.println(key + " = " + value);
+        }
+    }
+    */
 }

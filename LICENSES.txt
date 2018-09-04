@@ -1,4 +1,4 @@
-Copyright (C) 2005-2012, The Max Planck Institute for Psycholinguistics.
+Copyright (C) 2005-2018, The Max Planck Institute for Psycholinguistics.
 
 This file is part of ELAN.
 
@@ -25,18 +25,14 @@ Apache Xalan, a library that provides XSLT support,
 Copyright © 1999-2011 The Apache Software Foundation, 
 Licensed under the Apache License, Version 2.0.
 
-Batik, a Java SVG Toolkit,
-Copyright © 2000-2009 The Apache Software Foundation, 
-Licensed under the Apache License, Version 2.0.
-
 HSQLDB, (HyperSQL DataBase) a SQL relational database engine written in Java,
 Copyright (c) 2001-2010, The HSQL Development Group
 For the license (BSD based), see: http://hsqldb.org/web/hsqlLicense.html
 
-JNIWrapper/ComfyJ, a library that enables access to native libraries and components from Java code,
-Copyright (c) 2012 TeamDev Ltd. 
-Licensed under a commercial TeamDev License Agreement, see: http://www.teamdev.com/jniwrapper/licensing/
-
 GATE, A General Architecture for Text Engineering, input methods library
 Copyright © 1995-2011, The University of Sheffield
+Free software available under the GNU Lesser General Public Licence 3.0.
+
+VLCJ, a Java to native VLC bridge
+Copyright © 1995-2011, Caprica Software
 Free software available under the GNU Lesser General Public Licence 3.0.

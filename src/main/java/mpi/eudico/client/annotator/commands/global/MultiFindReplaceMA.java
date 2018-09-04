@@ -2,7 +2,6 @@ package mpi.eudico.client.annotator.commands.global;
 
 import mpi.eudico.client.annotator.ElanFrame2;
 import mpi.eudico.client.annotator.ElanLocale;
-
 import mpi.eudico.client.annotator.search.viewer.EAFMultipleFindReplaceDialog;
 
 import java.awt.event.ActionEvent;
@@ -15,6 +14,7 @@ import javax.swing.JOptionPane;
  *
  * @author Han Sloetjes
  */
+@SuppressWarnings("serial")
 public class MultiFindReplaceMA extends AbstractProcessMultiMA {
     /**
      * Creates a new MultiFindReplaceMA instance
@@ -36,9 +36,9 @@ public class MultiFindReplaceMA extends AbstractProcessMultiMA {
         int option = JOptionPane.showConfirmDialog(frame,
                 ElanLocale.getString("MultipleFileSearch.FindReplace.WarnInit"),
                 ElanLocale.getString("Message.Warning"),
-                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
 
-        if (option == JOptionPane.YES_OPTION) {
+        if (option == JOptionPane.OK_OPTION) {
             // always modal??
             new EAFMultipleFindReplaceDialog(frame).setVisible(true);
         }

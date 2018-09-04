@@ -71,6 +71,7 @@ public class UpdateTranscriptionsForECVDialog extends ClosableDialog implements
 	private JProgressBar progressBar;
 	private Command command;
 	private SwingWorker<Void, Void> task;
+	private JCheckBox annoValuePrecedenceCB;
 	/**
 	 * Constructor with a parent frame
 	 * 
@@ -134,7 +135,9 @@ public class UpdateTranscriptionsForECVDialog extends ClosableDialog implements
 		JLabel languageLabel = new JLabel(ElanLocale.getString("UpdateMTranscriptionsForECVDialog.Language"));
 		newLanguageComboBox = getNewLanguageComboBox();
 		
-		JLabel progressLabel = new JLabel(ElanLocale.getString("UpdateMTranscriptionsForECVDialog.progressBar"));
+		annoValuePrecedenceCB = new JCheckBox(ElanLocale.getString("UpdateMTranscriptionsForECVDialog.AnnotationValuePrecedence"));
+		
+		JLabel progressLabel = new JLabel(ElanLocale.getString("MultipleFileSearch.FindReplace.Progress"));//reuse
 		progressBar = new JProgressBar(0, 100);
 		progressBar.setValue(0);
 		progressBar.setStringPainted(true);
@@ -208,9 +211,15 @@ public class UpdateTranscriptionsForECVDialog extends ClosableDialog implements
 		pane.add(newLanguageComboBox, gbc);
 		
 		gbc.gridy = 9;
-		pane.add(progressLabel, gbc);
+		gbc.insets = new Insets(8, 6, 0, 6);
+		pane.add(annoValuePrecedenceCB, gbc);
 		
 		gbc.gridy = 10;
+		gbc.insets = new Insets(12, 6, 0, 6);
+		pane.add(progressLabel, gbc);
+		
+		gbc.gridy = 11;
+		gbc.insets = insets;
 		pane.add(progressBar, gbc);
 		
 		gbc = new GridBagConstraints();
@@ -259,6 +268,12 @@ public class UpdateTranscriptionsForECVDialog extends ClosableDialog implements
 			LangInfo langInfo = LanguageCollection.getLanguageInfo(stringPref);
 			newLanguageComboBox.getModel().setSelectedItem(langInfo);
 		}
+		
+		boolPref = Preferences.getBool("UpdateTranscriptionsForECV.AnnotationValuePrecedence", null);
+		if (boolPref != null) {
+			annoValuePrecedenceCB.setSelected(boolPref);
+		}
+		
 	}
 	
 	private void savePreferences() {
@@ -282,6 +297,8 @@ public class UpdateTranscriptionsForECVDialog extends ClosableDialog implements
 				Preferences.set("UpdateTranscriptionsForECV.LanguageRef", langRef, null, false, false);
 			}
 		}
+		Preferences.set("UpdateTranscriptionsForECV.AnnotationValuePrecedence", 
+				annoValuePrecedenceCB.isSelected(), null, false, false);
 	}
 
 	@Override
@@ -449,6 +466,7 @@ public class UpdateTranscriptionsForECVDialog extends ClosableDialog implements
 		}
 		
 		boolean recursive = recursiveCB.isSelected();
+		boolean annoPrecedence = annoValuePrecedenceCB.isSelected();
 		
 		//String language = languageTF.getText();
 		String language = ((LangInfo) newLanguageComboBox.getSelectedItem()).getId();
@@ -459,7 +477,7 @@ public class UpdateTranscriptionsForECVDialog extends ClosableDialog implements
 			((ProcessReporter) command).setProcessReport(new SimpleReport(ElanLocale.getString("UpdateMTranscriptionsForECVDialog.Title")));
 		}
 		command.execute(this, new Object[]{sourceFol, destFol, 
-				Boolean.valueOf(recursive), language});
+				Boolean.valueOf(recursive), language, Boolean.valueOf(annoPrecedence)});
 		return true;
 	}
 	

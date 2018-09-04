@@ -324,9 +324,8 @@ public class EAFSkeletonParser {
     		String recId = recordIter.next();
     		LexiconServiceRecord record = lexiconServices.get(recId);
     		// for bundle
-    		LexiconIdentification lexiconIdentification = new LexiconIdentification();
-    		lexiconIdentification.setId(record.getLexiconId());
-    		lexiconIdentification.setName(record.getLexiconName());
+    		LexiconIdentification lexiconIdentification = new LexiconIdentification(
+    				record.getLexiconId(), record.getLexiconName());
     		// for lexicon link
     		LexiconLink link = new LexiconLink(record.getName(), record.getType(), 
     				record.getUrl(), null, lexiconIdentification);

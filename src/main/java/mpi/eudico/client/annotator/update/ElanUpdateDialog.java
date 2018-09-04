@@ -3,6 +3,7 @@ package mpi.eudico.client.annotator.update;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Desktop;
+import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
@@ -99,9 +100,9 @@ public class ElanUpdateDialog {
 			String url;
 			String test = System.getProperty("UpdateTest");
 			if(test != null && test.toLowerCase().equals("true")){
-				url = "http://www.mpi.nl/tools/elan/TestUpdateInfo.xml";	
+				url = "https://www.mpi.nl/tools/elan/TestUpdateInfo.xml";	
 			} else{
-				url = "http://www.mpi.nl/tools/elan/ElanUpdateInfo.xml";					
+				url = "https://www.mpi.nl/tools/elan/ElanUpdateInfo.xml";					
 			}
 			URLConnection con = new URL(url).openConnection();	
 			reader = new UpdateXmlParser(new InputSource(con.getInputStream()));	
@@ -134,7 +135,7 @@ public class ElanUpdateDialog {
 			error = true;
 			ClientLogger.LOG.info("Cannot parse the file: " + e.getMessage());			
 			errorMessage = ElanLocale.getString("ElanUpdateDialog.Error.Parse");
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 		catch (IOException e) {
 			error = true;
@@ -268,8 +269,9 @@ public class ElanUpdateDialog {
 		dialog.setTitle(ElanLocale.getString("ElanUpdateDialog.Title"));
 		if(automaticUpdate){
 			dialog.setModal(false);
+			dialog.setModalExclusionType(Dialog.ModalExclusionType.APPLICATION_EXCLUDE);
 			dialog.setAlwaysOnTop(true);
-		}else {
+		} else {
 			dialog.setModal(true);
 		}	
 		

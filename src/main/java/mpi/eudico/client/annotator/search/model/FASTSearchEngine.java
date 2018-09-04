@@ -144,6 +144,7 @@ public class FASTSearchEngine implements SearchEngine {
         	// stop of thread can cause ConcurrentModificationException
             // (will be ignored since it has no further consequences)
         }
+
     }
 
     private static class xmlParserTask implements Runnable {
@@ -187,6 +188,9 @@ public class FASTSearchEngine implements SearchEngine {
                 pendingTasks.decrementAndGet();
     		} catch (Exception e) {
     			System.out.println("xmlParserThread (ID:" + Thread.currentThread().getId() + ") error: " + e.toString() );
+                // decrement the count, even when there was an error. Completion of the search depends on pendingTasks
+    			// becoming 0 in the end
+                pendingTasks.decrementAndGet();
     		}
     	}
     	

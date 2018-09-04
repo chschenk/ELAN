@@ -13,6 +13,7 @@ import mpi.eudico.client.annotator.ElanLocale;
 import mpi.eudico.server.corpora.clomimpl.abstr.TierImpl;
 import mpi.eudico.server.corpora.clomimpl.type.Constraint;
 import mpi.eudico.server.corpora.clomimpl.type.LinguisticType;
+import mpi.eudico.server.corpora.lexicon.LexiconQueryBundle2;
 import mpi.eudico.util.multilangcv.LangInfo;
 
 /**
@@ -1038,10 +1039,16 @@ public class MFEModel {
 			type.addConstraint(o_type.getConstraints());
 			type.setDataCategory(o_type.getDataCategory());
 			type.setTimeAlignable(o_type.isTimeAlignable());
+			// HS Aug 2018 must set controlled vocabulary and lexicon bundle because these 
+			// fields are part of the equals() implementation
+			type.setControlledVocabularyName(o_type.getControlledVocabularyName());
+			if (o_type.getLexiconQueryBundle() != null) {
+				type.setLexiconQueryBundle(new LexiconQueryBundle2(o_type.getLexiconQueryBundle()));
+			}
 			type_data.add(type);
 			type_changes.add(Changes.NONE);
 		}
-		
+		// HS Aug 2018 indexOf depends on equals() of LinguisticType
 		return type_data.indexOf(o_type); 
 	}
 	

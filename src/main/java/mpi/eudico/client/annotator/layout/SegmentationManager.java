@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -307,6 +308,7 @@ public class SegmentationManager implements ModeLayoutManager {
 		int visibleMediaHeight = mediaAreaHeight;
 
 		int firstMediaWidth = visibleMediaWidth;
+		int firstMediaHeight = mediaAreaHeight;
 					
 		if (oneRowForVisuals) {
 			if (numVisualPlayers >= 1) {
@@ -328,15 +330,23 @@ public class SegmentationManager implements ModeLayoutManager {
 					}					
 					if (i == 0) {		
 						visibleMediaWidth = visibleMediaX + curWidth + componentMargin;
-						if(mediaInCentre){							
-							visibleMediaX = (containerWidth - visibleMediaWidth*numVisualPlayers)/2;
-						}
 						 visComp.setBounds(visibleMediaX, visibleMediaY, curWidth, curHeight);
 						 firstMediaWidth = curWidth;// used by the time panel
-						 //visibleMediaWidth = visibleMediaX + curWidth + componentMargin;
 					} else {
 						visComp.setBounds(visibleMediaX + visibleMediaWidth, visibleMediaY, curWidth, curHeight);
 						visibleMediaWidth = visibleMediaWidth + curWidth + componentMargin;
+					}
+				}
+				// recalculate X coordinates now that the total width of the videos is known
+				if (mediaInCentre) {
+					visibleMediaX = (containerWidth - visibleMediaWidth) / 2;
+					int shiftX = 0;
+					for (int i = 0; i < numVisualPlayers && i < 4; i++) {
+						if (i == 0) {
+							shiftX = visibleMediaX - visualPlayers[i].visualComponent.getX();
+						}
+						Point p = visualPlayers[i].visualComponent.getLocation();
+						visualPlayers[i].visualComponent.setLocation(p.x + shiftX, p.y);
 					}
 				}
 			}
@@ -344,28 +354,30 @@ public class SegmentationManager implements ModeLayoutManager {
 			//if (numVisualPlayers == 0) {
 			//	visibleMediaHeight = mediaAreaHeight;
 			//}
+			int maxWidthForMedia = containerWidth - minTabWidth;
 			if (numVisualPlayers >= 1) {
 				// layout the first video
 				Component firstVisualComp = visualPlayers[0].visualComponent;
 				float aspectRatio = visualPlayers[0].player.getAspectRatio();
-				int firstMediaHeight = mediaAreaHeight;
 				firstMediaWidth = ElanLayoutManager.MASTER_MEDIA_WIDTH;
 				// jan 2007 if the source- or encoded-width of the video is more than twice the MASTER_
 				// MEDIA_WIDTH constant, then divide the real source width by 2 for optimal rendering
 				if (visualPlayers[0].player.getSourceWidth() > 2 * ElanLayoutManager.MASTER_MEDIA_WIDTH && 
 				        mediaAreaHeight == ElanLayoutManager.MASTER_MEDIA_HEIGHT) {
 				    firstMediaWidth = visualPlayers[0].player.getSourceWidth() / 2;
-				    firstMediaHeight = (int) (firstMediaWidth / aspectRatio);
 				    //System.out.println("adj. width: " + firstMediaWidth);
 				} else {
 				    firstMediaWidth = (int) (firstMediaHeight * aspectRatio);
 				}
-				//firstMediaHeight = (int) ((float) firstMediaWidth / aspectRatio);
-				//if (firstMediaHeight < mediaAreaHeight) {
-				//	firstMediaHeight = mediaAreaHeight;
-				//	firstMediaWidth = (int) (firstMediaHeight * aspectRatio);
-					//System.out.println("height: " + firstMediaHeight + " width: " + firstMediaWidth);
-				//}
+				// force inside media area
+				firstMediaWidth = firstMediaWidth > maxWidthForMedia ? maxWidthForMedia : firstMediaWidth;
+			    firstMediaHeight = (int) (firstMediaWidth / aspectRatio);
+			    // revert if the height > media area height
+			    if (firstMediaHeight > mediaAreaHeight) {
+			    	firstMediaHeight = mediaAreaHeight;
+			    	firstMediaWidth = (int) (firstMediaHeight * aspectRatio);
+			    }
+				
 				visibleMediaWidth = firstMediaWidth + componentMargin;	
 				visibleMediaHeight = firstMediaHeight;
 				if(numVisualPlayers == 1){
@@ -379,25 +391,60 @@ public class SegmentationManager implements ModeLayoutManager {
 			}
 			if (numVisualPlayers == 2) {
 				Component secondVisualComp = visualPlayers[1].visualComponent;
-				float aspectRatio = visualPlayers[1].player.getAspectRatio();
-				int secondMediaWidth = (int) (visibleMediaHeight * aspectRatio);
+				float secondAR = visualPlayers[1].player.getAspectRatio();
+							
+				int secondMediaWidth = (int) (visibleMediaHeight * secondAR);
 				int secondMediaHeight = visibleMediaHeight;
+				// try to use exactly half of the width in some cases
+				if (visualPlayers[1].player.getSourceWidth() > 2 * ElanLayoutManager.MASTER_MEDIA_WIDTH && 
+						visualPlayers[1].player.getSourceWidth() > visualPlayers[0].player.getSourceWidth()) {
+					secondMediaWidth = visualPlayers[1].player.getSourceWidth() / 2;
+					secondMediaHeight = (int) (secondMediaWidth / secondAR);
+					// revert if the height > mediaAreaHeight
+					if (secondMediaHeight > mediaAreaHeight) {
+						secondMediaHeight = mediaAreaHeight;
+						secondMediaWidth = (int) (secondMediaHeight * secondAR);
+					}
+				}
+				// force the two video's inside the available area, try to maintain same height, possibly different widths
+				if (firstMediaWidth + secondMediaWidth + componentMargin > maxWidthForMedia) {
+					// opt. 1: calculate the ratio to fit the two video's in the available width
+					float sizeRatio = (maxWidthForMedia - componentMargin) / (float)(firstMediaWidth + secondMediaWidth);
+					firstMediaWidth = (int) (sizeRatio * firstMediaWidth);
+					firstMediaHeight = (int) (firstMediaWidth / visualPlayers[0].player.getAspectRatio());
+					
+					visibleMediaWidth = firstMediaWidth + componentMargin;					
+					secondMediaWidth = (int) (sizeRatio * secondMediaWidth);
+					secondMediaHeight = (int) (secondMediaWidth / secondAR);
+					// due to rounding effects the two heights might not be equal
+					secondMediaHeight = firstMediaHeight;					
+					// opt. 2: equal width for both videos, possibly different heights, doesn't make much sense
+					/*
+					firstMediaWidth = (maxWidthForMedia - componentMargin) / 2;
+					visibleMediaWidth = firstMediaWidth + componentMargin;
+					firstMediaHeight = (int) (firstMediaWidth / visualPlayers[0].player.getAspectRatio());
+					if (firstMediaHeight > visibleMediaHeight) {
+						firstMediaHeight = visibleMediaHeight;
+						firstMediaWidth = (int) (firstMediaHeight * visualPlayers[0].player.getAspectRatio());
+					}
+					
+					secondMediaWidth = firstMediaWidth;
+					secondMediaHeight = (int) (secondMediaWidth / secondAR);
+					if (secondMediaHeight > visibleMediaHeight) {
+						secondMediaHeight = visibleMediaHeight;
+						secondMediaWidth = (int) (secondMediaHeight * secondAR);
+					}
+					*/
+				}
+				
 				if(mediaInCentre){
 					visibleMediaX = (containerWidth - (visibleMediaWidth + secondMediaWidth))/2;
 				}				
 				visualPlayers[0].visualComponent.setBounds(containerMargin+visibleMediaX, visibleMediaY, firstMediaWidth,
-							visibleMediaHeight);					 
-				if (visualPlayers[1].player.getSourceWidth() > 2 * ElanLayoutManager.MASTER_MEDIA_WIDTH && 
-						visualPlayers[1].player.getSourceWidth() > visualPlayers[0].player.getSourceWidth()) {
-					secondMediaWidth = visualPlayers[1].player.getSourceWidth() / 2;
-					secondMediaHeight = (int) (secondMediaWidth / aspectRatio);
-					if (secondMediaHeight > visibleMediaHeight) {
-						visibleMediaHeight = secondMediaHeight;
-					}
-				}
+						firstMediaHeight);
 				secondVisualComp.setBounds(visibleMediaX + visibleMediaWidth,
 					visibleMediaY, secondMediaWidth, secondMediaHeight);
-				visibleMediaWidth += secondMediaWidth + componentMargin;
+				visibleMediaWidth += (secondMediaWidth + componentMargin);
 				//System.out.println("sec width: " + secondMediaWidth + " sec height: " + secondMediaHeight);
 			}
 			else if (numVisualPlayers == 3) {
@@ -463,18 +510,18 @@ public class SegmentationManager implements ModeLayoutManager {
         int tabPaneHeight = visibleMediaHeight;
         
         if(mediaInCentre){
+        	if(numVisualPlayers > 0){
+        		tabPaneWidth = visibleMediaX;
+        	} else {
+        		tabPaneWidth = tabPaneWidth/2;
+        		tabPaneX = tabPaneWidth;
+        	}    
         	tabPaneX = tabPaneX - containerMargin;
-        }
         
-        if(mediaInCentre && numVisualPlayers > 0){
-        	//tabPaneX = visibleMediaX + visibleMediaWidth * numVisualPlayers ;
-        	tabPaneWidth = visibleMediaX;
-            getLeftTabPane().setBounds(containerMargin, containerMargin, tabPaneWidth, tabPaneHeight);
-            
-        } else {     	
+        	getLeftTabPane().setBounds(containerMargin, containerMargin, tabPaneWidth, tabPaneHeight);
+        } else {
         	destroyLeftPane();
         }
-        	
         
         if (tabPane != null) {
             tabPane.setBounds(tabPaneX, tabPaneY, tabPaneWidth, tabPaneHeight);

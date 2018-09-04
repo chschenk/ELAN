@@ -111,9 +111,7 @@ public class LexiconComponentClient implements LexiconServiceClient {
 					// this (probably?) forces loading of the lexicon, needed for the description of lexicon
 					LexiconImpl lexImpl = LexiconContext.getInstance().getLexicon(lName);
 					if (lexImpl != null) {
-						LexiconIdentification li = new LexiconIdentification();
-						li.setId(lName);// reconsider
-						li.setName(lName);
+						LexiconIdentification li = new LexiconIdentification(lName, lName);// reconsider setting the ID
 						li.setDescription(lexImpl.getHeader().getDescription());
 						lexIds.add(li);
 					} else {

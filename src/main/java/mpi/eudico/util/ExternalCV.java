@@ -60,7 +60,13 @@ public class ExternalCV extends ControlledVocabulary {
 	}
 
 	public void setExternalRef(ExternalReference externalRef) {
-		this.externalRef = externalRef;
+		if (this.externalRef == null) {
+			this.externalRef = externalRef;
+		} else if (!this.externalRef.equals(externalRef)){
+			this.externalRef = externalRef;
+			// in principle this ECV should be reloaded from the new url?
+			super.handleModified();
+		}
 	}
 	
 	

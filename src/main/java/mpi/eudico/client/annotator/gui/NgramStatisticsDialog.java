@@ -8,6 +8,7 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -410,7 +411,9 @@ public class NgramStatisticsDialog extends ClosableDialog
 	 */
 	private void loadTiersFromDomain () {
 		// cache the previous domain so we can check if it was changed
-		String lastDomain = selectedDomain;
+		// Note: the domain name doesn't guarantee much, the domain
+		// can be changed in the MFDomainDialog
+		// String lastDomain = selectedDomain;
 		
 		// create domain dialog
 		MFDomainDialog domainDialog = new MFDomainDialog(this, true);
@@ -419,24 +422,14 @@ public class NgramStatisticsDialog extends ClosableDialog
 		// when domain is selected, get the search paths
     	List<String> searchPaths = domainDialog.getSearchPaths();
     	List<String> searchDirs = domainDialog.getSearchDirs();
-    	String val = Preferences.getString("LastUsedMFSearchDomain", null);
-    	if (val == null) {
-    		val = "";
-    	}
+    	String val = domainDialog.getDomainName();
+    	// did we change domains or what? Only way is to compare all selected files
     	
-    	// did we change domains or what?
-    	// TODO we really need to fix domainDialog so it RETURNS the selected domain
-    	// instead of futzing around with LastUsedMFSearchDomain!!!
-    	if ( lastDomain != null && lastDomain.equals(val) ) {
-    		return;
-    	} else {
-    		// WAIT A SEC! exiting the domainDialog doesn't give us searchPaths/Dirs but lastusedMFSearchDomain is defined!!!
-    		if (searchPaths.size() == 0 && searchDirs.size() == 0) {
-    			return;
-    		} else {
-    			selectedDomain = val;
-    		}
-    	}
+		if (searchPaths.size() == 0 && searchDirs.size() == 0) {
+			return;
+		} else {
+			selectedDomain = val;
+		}
     	
    		tierSelectPanel.setBorder( new TitledBorder( ElanLocale.getString("Statistics.Multi.TierSelection") +
     				" (" + ElanLocale.getString("MFE.Domain") + ": " + val + ")" ));
@@ -464,29 +457,41 @@ public class NgramStatisticsDialog extends ClosableDialog
 			updateStatisticsButton.setEnabled(false);
 			return;
 		}
-					
-		// Open the first file, and load the tiers from it
-		EAFSkeletonParser parser = new EAFSkeletonParser(fileNames.get(0));
-		try {
+		
+		List<TierImpl> tiers = null;
+		int count = 0;
+		while (tiers == null && count < fileNames.size()) {		
+			// Open the first file, and load the tiers from it, this assumes all files contain the same tiers
+			EAFSkeletonParser parser = new EAFSkeletonParser(fileNames.get(count++));
 			// also, squelch any output...
 			SquelchOutput s = new SquelchOutput();
-			s.squelchOutput();
-			parser.parse();
-			s.restoreOutput();
-		} catch (Exception e) {
-			// ignore?
+			try {
+				s.squelchOutput();
+			} catch (IOException ioe){}
+			
+			try {
+				parser.parse();
+			} catch (Exception e) {
+				// ignore?
+			}
+			
+			try {
+				s.restoreOutput();
+			} catch (IOException ioe){}
+			
+	        tiers = parser.getTiers();
 		}
-
-        List<TierImpl> tiers = parser.getTiers();
+		
         Set<String> uniqueTierNames = new TreeSet<String>();
 
-        for (int i = 0; i < tiers.size(); i++) {
-        	TierImpl tier = tiers.get(i);
-            if (tier != null) {
-            	uniqueTierNames.add(tier.getName());
-            }
+        if (tiers != null) {      
+	        for (int i = 0; i < tiers.size(); i++) {
+	        	TierImpl tier = tiers.get(i);
+	            if (tier != null) {
+	            	uniqueTierNames.add(tier.getName());
+	            }
+	        }
         }
-        
         //update table
         if ( uniqueTierNames.isEmpty() ) {
         	tierTable.getSelectionModel().removeListSelectionListener(this);

@@ -5,11 +5,14 @@ import java.awt.Color;
 import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Frame;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.HeadlessException;
 import java.awt.Insets;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
@@ -115,11 +118,23 @@ public class EditPrefsDialog extends ClosableDialog implements ActionListener,
     private void postInit() {
         pack();
 
-        int w = 720;
-        int h = 450;
-        setSize((getSize().width < w) ? w : getSize().width,
-            (getSize().height < h) ? h : getSize().height);
-        setLocationRelativeTo(getParent());
+        Rectangle b = Preferences.getRect("EditPreferencesDialog.Bounds", null);
+        if (b != null) {
+        	// check if it is on screen
+    		GraphicsDevice[] screens = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
+    		for (GraphicsDevice gd : screens) {
+    			if (gd.getDefaultConfiguration().getBounds().intersects(b)) {
+    				this.setBounds(b);
+    				break;
+    			}
+    		}        	
+        } else {
+	        int w = 720;
+	        int h = 450;
+	        setSize((getSize().width < w) ? w : getSize().width,
+	            (getSize().height < h) ? h : getSize().height);
+	        setLocationRelativeTo(getParent());
+        }
     }
 
     /**
@@ -338,7 +353,8 @@ public class EditPrefsDialog extends ClosableDialog implements ActionListener,
     
     private void closeDialog(){
     	// remove the temporary value
-        Preferences.set("Media.VideosCentre.Temporary", null, null);	    	
+        Preferences.set("Media.VideosCentre.Temporary", null, null);
+        Preferences.set("EditPreferencesDialog.Bounds", getBounds(), null);
     	dispose();     
     	
     }

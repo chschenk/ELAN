@@ -39,12 +39,17 @@ public class FlexEncoder {
 	private String mediaGUID;	
 	
 	private HashMap<String, String> guidMap = new HashMap<String, String>();
+	
+	private boolean exportEmptyItems = true;
 		
 	/**
 	 * No-arg constructor.
 	 */
 	public FlexEncoder() {
-		
+		String emptyItemsSetting = System.getProperty("FLExExport.ExportEmptyItems");
+		if (emptyItemsSetting != null) {
+			exportEmptyItems = Boolean.valueOf(emptyItemsSetting);
+		}
 	}
 	
 	/**
@@ -354,6 +359,9 @@ public class FlexEncoder {
 	 * @return element
 	 */
 	private Element createItemElement(Document doc, String tierName, Annotation ann) {
+		if (ann.getValue().isEmpty() && !exportEmptyItems) {
+			return null;
+		}
 		Element text = doc.createElement(FlexConstants.ITEM);	
 		text.setTextContent(ann.getValue());
 		
@@ -560,7 +568,9 @@ public class FlexEncoder {
 		//if(getTypeName(phraseTier.getName()) != null && getLanguage(phraseTier.getName()) != null){
 			//TO DO: set default values for type and lang
 			phrItemEl = createItemElement(doc, phraseTier.getName(), phraseAnn);
-			phrEl.appendChild(phrItemEl);
+			if (phrItemEl != null) {
+				phrEl.appendChild(phrItemEl);
+			}
 		//}
 		
 		List<TierImpl> selectedItemTiers = encoderInfo.getMappingForItem(FlexConstants.PHRASE); 
@@ -579,7 +589,9 @@ public class FlexEncoder {
 					if(childAnns != null && childAnns.size() > 0){
 						//TO DO: set default values for type and lang
 						phrItemEl = createItemElement(doc, childTier.getName(), childAnns.get(0));
-						phrEl.appendChild(phrItemEl);
+						if (phrItemEl != null) {
+							phrEl.appendChild(phrItemEl);
+						}
 					}
 				} else if(wordTiers.contains(childTier) && !wordTierAdded){
 					//create words element
@@ -613,7 +625,7 @@ public class FlexEncoder {
 			// TODO LOG
 			return;
 		}
-		
+
 		TierImpl wordTier = (TierImpl)wordAnn.getTier();
 		
 		Element wordEl = doc.createElement(FlexConstants.WORD);
@@ -624,7 +636,9 @@ public class FlexEncoder {
 		//if(getTypeName(wordTier.getName()) != null && getLanguage(wordTier.getName()) != null){
 			//TO DO: set default values for type and lang
 			wordItemEl = createItemElement(doc, wordTier.getName(), wordAnn);
-			wordEl.appendChild(wordItemEl);
+			if (wordItemEl != null) {
+				wordEl.appendChild(wordItemEl);
+			}
 		//}
 		
 		
@@ -635,24 +649,25 @@ public class FlexEncoder {
 		List<TierImpl> selectedItemTiers = encoderInfo.getMappingForItem(FlexConstants.WORD); 
 		List<TierImpl> morphTiers = encoderInfo.getMappingForElement(FlexConstants.MORPH);
 		List<TierImpl> childTiers = wordTier.getChildTiers();
-		TierImpl childTier;
-		List<Annotation> childAnns;
+
 		if(childTiers != null){
 			boolean morphTierAdded = false;
 			for(int i= 0; i < childTiers.size(); i++){
-				childTier = childTiers.get(i);
+				TierImpl childTier = childTiers.get(i);
 				if(selectedItemTiers.contains(childTier)){
 				//if(childTier.getLinguisticType().getConstraints().getStereoType() == Constraint.SYMBOLIC_ASSOCIATION){
-					childAnns = wordAnn.getChildrenOnTier(childTier);
+					List<Annotation> childAnns = wordAnn.getChildrenOnTier(childTier);
 					
 					//add word item
 					if(childAnns != null && childAnns.size() > 0){
 						//TO DO: set default values for type and lang
-						wordItemEl = createItemElement(doc, childTier.getName(), childAnns.get(0));
-						wordEl.appendChild(wordItemEl);
+						Element chWordItemEl = createItemElement(doc, childTier.getName(), childAnns.get(0));
+						if (chWordItemEl != null) {
+							wordEl.appendChild(chWordItemEl);
+						}
 					}
 				} else if(morphTiers.contains(childTier) && !morphTierAdded){				
-					childAnns = wordAnn.getChildrenOnTier(childTier);
+					List<Annotation> childAnns = wordAnn.getChildrenOnTier(childTier);
 										
 					if(childAnns != null && childAnns.size() > 0){
 						//create morphemes element
@@ -668,6 +683,22 @@ public class FlexEncoder {
 					
 				}
 			}
+		}
+		// deal with very special case: word-item element of type txt has no content data and 
+		// no child nodes but there is a next word-item sibling of type punct, remove the empty txt item
+		// To prevent e.g. the following:
+        /*
+		<word guid="7c7dc8b7-51d8-4cc4-a076-44b4f6641ca1">
+        	<item lang="trn" type="txt"/>
+        	<item lang="es" type="punct">,</item>
+        </word>
+		*/
+		if (wordItemEl != null && !wordItemEl.hasChildNodes() && wordItemEl.getNextSibling() != null && // && next sibling type attr. is punct?
+				(wordItemEl.getTextContent() == null || wordItemEl.getTextContent().isEmpty())) {
+			wordEl.removeChild(wordItemEl);
+		}
+		if (!wordEl.hasChildNodes() && !exportEmptyItems) {
+			wordsEl.removeChild(wordEl);
 		}
 	}
 
@@ -688,8 +719,7 @@ public class FlexEncoder {
 			
 		Element morphEl = doc.createElement(FlexConstants.MORPH);
 		morphsEl.appendChild(morphEl);		
-		
-		Element morphItemEl;	
+			
 		boolean morphTypeFound = false;
 		
 		morphEl.setAttribute(FlexConstants.GUID, getGuidValue(null, FlexConstants.MORPH));	// random value
@@ -698,26 +728,28 @@ public class FlexEncoder {
 		List<TierImpl> morphTypeTiersList = encoderInfo.getMorphTypeTiers();
 		List<TierImpl> selectedItemTiers = encoderInfo.getMappingForItem(FlexConstants.MORPH); 
 		
-		morphItemEl = createItemElement(doc, morphAnn.getTier().getName(), morphAnn);
-		morphEl.appendChild(morphItemEl);
+		Element morphItemEl = createItemElement(doc, morphAnn.getTier().getName(), morphAnn);
+		if (morphItemEl != null) {
+			morphEl.appendChild(morphItemEl);
+		}
 			
 		List<TierImpl> childTiers = morphTier.getChildTiers();
-		TierImpl childTier;
-		List<Annotation> childAnns;
 		if(childTiers != null){			
 			for(int i= 0; i < childTiers.size(); i++){
-				childTier = childTiers.get(i);
+				TierImpl childTier = childTiers.get(i);
 				if(selectedItemTiers.contains(childTier)){
 				//if(childTier.getLinguisticType().getConstraints().getStereoType() == Constraint.SYMBOLIC_ASSOCIATION){
-					childAnns = morphAnn.getChildrenOnTier(childTier);
+					List<Annotation> childAnns = morphAnn.getChildrenOnTier(childTier);
 					
 					//add morph item
 					if(childAnns != null && childAnns.size() > 0){						
 						morphItemEl = createItemElement(doc, childTier.getName(), childAnns.get(0));
-						morphEl.appendChild(morphItemEl);						
+						if (morphItemEl != null) {
+							morphEl.appendChild(morphItemEl);
+						}
 					}
 				} else if(!morphTypeFound && morphTypeTiersList.contains(childTier)) {
-					childAnns = morphAnn.getChildrenOnTier(childTier);
+					List<Annotation> childAnns = morphAnn.getChildrenOnTier(childTier);
 					if(childAnns != null && childAnns.size() > 0){
 						morphEl.setAttribute(FlexConstants.GUID, getGuidValue(childAnns.get(0), FlexConstants.MORPH));	
 						morphEl.setAttribute(FlexConstants.TYPE, childAnns.get(0).getValue());
@@ -725,6 +757,9 @@ public class FlexEncoder {
 					} 
 				}
 			}
+		}
+		if (!morphEl.hasChildNodes() && !exportEmptyItems) {
+			morphsEl.removeChild(morphEl);
 		}
 	}
 	

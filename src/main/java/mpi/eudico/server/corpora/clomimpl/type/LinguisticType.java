@@ -4,11 +4,22 @@ import mpi.eudico.server.corpora.lexicon.LexiconQueryBundle2;
 
 /**
  * DOCUMENT ME!
- * $Id: LinguisticType.java 44075 2015-07-21 15:11:43Z olasei $
+ * $Id: LinguisticType.java 46480 2018-07-25 13:00:31Z hasloe $
  * @author $Author$
  * @version $Revision$
  */
 public class LinguisticType {
+	/** an enumeration of property keys */
+	public enum PropKey {
+		ID,
+		NAME,
+		CONSTRAINT,
+		CV_NAME,
+		DC,
+		LEX_BUNDLE,
+		LEX_LINK,
+		LEX_FIELD
+	};
     /** Holds value of property DOCUMENT ME! */
     String typeName;
 
@@ -46,8 +57,8 @@ public class LinguisticType {
      * Duplicates a linguistic type instance using a new name.
      * Note that this does not clone the CV if that's desired.
      * 
-     * @param theName
-     * @param orig
+     * @param theName the (new) name of the type
+     * @param orig the type to copy
      */
     public LinguisticType(String theName, LinguisticType orig) {
     	this(theName);
@@ -63,7 +74,15 @@ public class LinguisticType {
     	// The caller should clone CV but for now, use the same name
     	setControlledVocabularyName(orig.getControlledVocabularyName());
     	setDataCategory(orig.getDataCategory());
-    	setLexiconQueryBundle(orig.getLexiconQueryBundle());
+    	// add a copy of the lexicon query bundle, if any
+    	if (orig.getLexiconQueryBundle() != null) {
+	    	LexiconQueryBundle2 copyBundle = new LexiconQueryBundle2(orig.getLexiconQueryBundle());
+	    	// the copy constructor does not copy the service client, set it separately
+	    	if (copyBundle.getLink() != null) {
+	    		copyBundle.getLink().setSrvcClient(orig.getLexiconQueryBundle().getLink().getSrvcClient());
+	    	}
+	    	setLexiconQueryBundle(copyBundle);
+    	}
     }
 
     /**

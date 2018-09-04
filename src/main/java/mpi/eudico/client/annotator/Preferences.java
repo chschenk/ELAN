@@ -354,7 +354,7 @@ public class Preferences {
     
     /**
      * Access function for the whole of the preferences tree.
-     * May load the preferences is the Transcription is unknown in the
+     * May load the preferences if the Transcription is unknown in the
      * global preferences collection, but if so, doesn't add to it.
      * 
      * @param document the Transcription
@@ -560,6 +560,38 @@ public class Preferences {
     	
     	Map<String, Object> loadedPrefs = xmlPrefsReader.parse(filePath);
     	if (loadedPrefs.size() == 0) {
+    		return;
+    	}
+    	// apply the prefs to the document by using set(key, object, document) for all elements
+    	if (preferences == null) {
+    		preferences = new HashMap<Object, Map<String, Object>>();
+    	}
+    	// replace current settings
+    	if(preferences.get(documentKeyFor(document)) == null){
+    		preferences.put(documentKeyFor(document), loadedPrefs);
+    	} else { 
+    		preferences.get(documentKeyFor(document)).putAll(loadedPrefs);
+    	}
+    	// write preferences
+    	writePreferencesFor(document);
+    	
+    	// notify all listeners of the document
+    	notifyListeners(document);
+    }
+    
+    /**
+     * Applies the preferences loaded in the specified map to the 
+     * (listeners of) the specified document.
+     * 
+     * @param document the document to apply the loaded preferences to
+     * @param loadedPrefs the map with preferences from another file, already loaded
+     */
+    public static void importPreferences(Transcription document, Map<String, Object> loadedPrefs) {
+    	if (document == null) {
+    		return;
+    	}
+
+    	if (loadedPrefs == null || loadedPrefs.size() == 0) {
     		return;
     	}
     	// apply the prefs to the document by using set(key, object, document) for all elements

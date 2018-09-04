@@ -5,7 +5,8 @@ import mpi.eudico.client.util.CheckBoxTableCellRenderer;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -17,6 +18,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 
 
@@ -26,6 +28,7 @@ import javax.swing.table.TableColumn;
  * @author Han Sloetjes
  * @version 1.0
   */
+@SuppressWarnings("serial")
 public class ExportTabCustomizePanel extends JPanel {
     private JTable table;
     private DefaultTableModel model;
@@ -183,7 +186,11 @@ public class ExportTabCustomizePanel extends JPanel {
             table.getColumnModel().getColumn(i).setCellEditor(cbEditor);
             table.getColumnModel().getColumn(i).setCellRenderer(cbRenderer);
         }
-
+        int rowHeight = table.getRowHeight();
+        table.setRowHeight((int)(1.5 * rowHeight));
+        int rowMarg = table.getRowMargin();
+        table.setRowMargin(Math.max(3, (int)(1.5 * rowMarg)));
+        
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.anchor = GridBagConstraints.NORTH;
         gridBagConstraints.insets = insets;
@@ -191,5 +198,26 @@ public class ExportTabCustomizePanel extends JPanel {
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
         add(new JScrollPane(table), gridBagConstraints);
+        
+        // add a mouse listener that updates the tool tip text with the name 
+        // of the column the mouse pointer is over
+        table.getTableHeader().addMouseMotionListener(new MouseMotionListener() {
+			
+			@Override
+			public void mouseMoved(MouseEvent e) {
+				int col = ((JTableHeader) e.getSource()).columnAtPoint(e.getPoint());
+				if (col > -1) {
+					Object val = ((JTableHeader) e.getSource()).getColumnModel().getColumn(col).getHeaderValue();
+					if (val != null) {
+						((JTableHeader) e.getSource()).setToolTipText(val.toString());
+					}
+				}
+			}
+			
+			@Override
+			public void mouseDragged(MouseEvent e) {
+				// stub
+			}
+		});
     }
 }

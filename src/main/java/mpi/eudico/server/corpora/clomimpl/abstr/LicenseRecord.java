@@ -12,13 +12,13 @@ public class LicenseRecord {
 	private String text;
 	
 	/**
-	 * @return the url. Not null.
+	 * @return the url. Can be null.
 	 */
 	public String getUrl() {
 		return url;
 	}
 	/**
-	 * @param url The url to of the license set. Not null.
+	 * @param url The url to of the license to set.
 	 */
 	public void setUrl(String url) {
 		this.url = url;

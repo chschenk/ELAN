@@ -172,9 +172,7 @@ public class LexiconConfigIO {
     			String lexiconSrvcName = attributes.getValue("LEXICON_NAME");	// Name of Lexicon
     			
     			if (lexiconClientName != null && lexiconSrvcType != null) {
-    				LexiconIdentification li = new LexiconIdentification();
-    				li.setName(lexiconSrvcName);
-    				li.setId(lexiconSrvcId);
+    				LexiconIdentification li = new LexiconIdentification(lexiconSrvcId, lexiconSrvcName);
     				LexiconLink link = new LexiconLink(lexiconClientName, 
     						lexiconSrvcType, lexiconSrvcUrl, 
     						null, li);

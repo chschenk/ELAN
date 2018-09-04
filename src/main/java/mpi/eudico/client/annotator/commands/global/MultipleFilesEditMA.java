@@ -14,6 +14,7 @@ import mpi.eudico.client.annotator.multiplefilesedit.MFEFrame;
  * @author Han Sloetjes
  *
  */
+@SuppressWarnings("serial")
 public class MultipleFilesEditMA extends FrameMenuAction {
 	
 	/**
@@ -33,9 +34,9 @@ public class MultipleFilesEditMA extends FrameMenuAction {
         int option = JOptionPane.showConfirmDialog(frame,
                 ElanLocale.getString("MFE.LaunchWarning"),
                 ElanLocale.getString("Message.Warning"),
-                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
 
-        if (option == JOptionPane.YES_OPTION) {
+        if (option == JOptionPane.OK_OPTION) {
         	new MFEFrame(ElanLocale.getString("MFE.FrameTitle")).setVisible(true);
         }
 	}

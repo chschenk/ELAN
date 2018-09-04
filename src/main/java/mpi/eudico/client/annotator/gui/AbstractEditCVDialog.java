@@ -1,5 +1,6 @@
 package mpi.eudico.client.annotator.gui;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
@@ -18,12 +19,14 @@ import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -31,10 +34,13 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.WindowConstants;
+import javax.swing.border.LineBorder;
 
+import mpi.eudico.client.annotator.Constants;
 import mpi.eudico.client.annotator.ElanLocale;
 import mpi.eudico.client.annotator.Preferences;
 import mpi.eudico.util.ControlledVocabulary;
+import mpi.eudico.util.ExternalCV;
 
 
 @SuppressWarnings("serial")
@@ -71,6 +77,8 @@ public abstract class AbstractEditCVDialog extends JDialog
     protected int minimumWidth;
     private final boolean multipleCVs;
 	private int editLanguagesNumber;
+	private Color defTextFieldBgColor;
+	//private Color defLabelFgColor;
 
     /**
      * Constructor with standard EditCVPanel
@@ -542,6 +550,9 @@ public abstract class AbstractEditCVDialog extends JDialog
             aMap.put(esc, new EscapeAction());
             aMap.put(enter, new EnterAction());
         }
+        cvComboBox.setRenderer(new CVListRenderer());
+        defTextFieldBgColor = cvDescArea.getBackground();
+        //defLabelFgColor = cvComboBox.getForeground();
     }
 
     /**
@@ -570,6 +581,7 @@ public abstract class AbstractEditCVDialog extends JDialog
 
     protected void updateCVButtons() {
         ControlledVocabulary cv = (ControlledVocabulary) cvComboBox.getSelectedItem();
+        boolean isExternal = cv instanceof ExternalCV;
         int lang = Math.max(0, cvLanguageComboBox.getSelectedIndex());
         changeCVButton.setEnabled(cv != null);
         deleteCVButton.setEnabled(cv != null);
@@ -577,6 +589,15 @@ public abstract class AbstractEditCVDialog extends JDialog
         cvDescArea.setText((cv != null) ? cv.getDescription(lang) : "");
         oldCVName = (cv != null) ? cv.getName() : null;
         oldCVDesc = (cv != null) ? cv.getDescription(lang) : null;
+        if (isExternal) {
+        	//cvComboBox.setForeground(Constants.ACTIVEANNOTATIONCOLOR);
+        	cvNameTextField.setBackground(Constants.LIGHT_YELLOW);
+        	cvDescArea.setBackground(Constants.LIGHT_YELLOW);
+        } else {
+        	//cvComboBox.setForeground(defLabelFgColor);
+        	cvNameTextField.setBackground(defTextFieldBgColor);
+        	cvDescArea.setBackground(defTextFieldBgColor);
+        }
     }
 
     /**
@@ -694,5 +715,24 @@ public abstract class AbstractEditCVDialog extends JDialog
 		public void actionPerformed(ActionEvent ae) {
             AbstractEditCVDialog.this.closeDialog();
         }
+    }
+    
+    /**
+     * A renderer that marks External CV's in the combo box with a different 
+     * background color. 
+     */
+    protected class CVListRenderer extends DefaultListCellRenderer {
+		@Override
+		public Component getListCellRendererComponent(JList list, Object value,
+				int index, boolean isSelected, boolean cellHasFocus) {
+			Component c = super.getListCellRendererComponent(list, value, index, isSelected,
+					cellHasFocus);
+			if (value instanceof ExternalCV) {
+				if (!isSelected) {
+					c.setBackground(Constants.LIGHT_YELLOW);
+				}
+			}
+			return c;
+		}    	
     }
 }

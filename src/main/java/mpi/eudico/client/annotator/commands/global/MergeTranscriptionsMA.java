@@ -2,10 +2,8 @@ package mpi.eudico.client.annotator.commands.global;
 
 import mpi.eudico.client.annotator.ElanFrame2;
 import mpi.eudico.client.annotator.ElanLocale;
-
 import mpi.eudico.client.annotator.gui.multistep.MultiStepPane;
 import mpi.eudico.client.annotator.gui.multistep.StepPane;
-
 import mpi.eudico.client.annotator.imports.MergeStep1;
 import mpi.eudico.client.annotator.imports.MergeStep2;
 
@@ -22,6 +20,7 @@ import javax.swing.JDialog;
  * @author Han Sloetjes
  * @version 1.0
  */
+@SuppressWarnings("serial")
 public class MergeTranscriptionsMA extends FrameMenuAction {
     /**
      * Creates a new MergeTranscriptionsMA instance
@@ -47,9 +46,10 @@ public class MergeTranscriptionsMA extends FrameMenuAction {
         pane.addStep(step1);
         pane.addStep(step2);
 
-        pane.setPreferredSize(new Dimension(650,400));
+        pane.setPreferredSize(new Dimension(650,500));
         JDialog jd = pane.createDialog(frame,
             ElanLocale.getString("MergeTranscriptionDialog.Title"), true);
+        jd.pack();
         jd.setBounds(jd.getX(), jd.getY() - 50, jd.getWidth(), jd.getHeight() + 100);
         jd.setVisible(true);
     }

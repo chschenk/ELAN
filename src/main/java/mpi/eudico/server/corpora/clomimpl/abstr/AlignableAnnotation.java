@@ -175,6 +175,9 @@ public class AlignableAnnotation extends AbstractAnnotation {
                 (!hasParentAnnotation())) {
             ((TierImpl) getTier()).correctOverlapsByPushing(this, oldBegin,
                 oldEnd);
+            // the above takes care of annotations to the left or right of this annotation.
+            // but in bulldozer mode depending time aligned annotations are not moved with the parent (this annotation), 
+            // while that usually is the desired behavior
         } else if (((((TierImpl) getTier()).getTranscription()).getTimeChangePropagationMode() == Transcription.SHIFT) &&
                 (!hasParentAnnotation())) {
             List<TimeSlot> fixedSlots = new ArrayList<TimeSlot>(connectedTimeSlots);

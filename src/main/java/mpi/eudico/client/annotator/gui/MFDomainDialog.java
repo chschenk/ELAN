@@ -2,13 +2,10 @@ package mpi.eudico.client.annotator.gui;
 
 import mpi.eudico.client.annotator.ElanLocale;
 import mpi.eudico.client.annotator.Preferences;
-
 import mpi.eudico.client.annotator.prefs.MultipleFileDomains;
-
 import mpi.eudico.client.annotator.search.viewer.EAFMultipleFileUtilities;
 import mpi.eudico.client.annotator.smfsearch.IMDISessionParser;
 import mpi.eudico.client.annotator.smfsearch.ImdiSearchServiceParser;
-
 import mpi.eudico.client.annotator.util.FileExtension;
 
 import java.awt.Dialog;
@@ -22,10 +19,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-
 import java.io.File;
 import java.io.IOException;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -51,10 +46,12 @@ import org.xml.sax.SAXException;
  * @author Han Sloetjes
  * @version 1.0
   */
+@SuppressWarnings("serial")
 public class MFDomainDialog extends JDialog implements ActionListener,
     MouseListener, ListSelectionListener {
     private List<String> searchDirs;
     private List<String> searchPaths;
+    private String curDomainName = "";
     private DefaultListModel model;
     private JList domainList;
     private JButton newButton;
@@ -321,6 +318,14 @@ public class MFDomainDialog extends JDialog implements ActionListener,
     public void setSearchPaths(List<String> searchPaths) {
         this.searchPaths = searchPaths;
     }
+    
+    /**
+     * @return the name of the loaded domain(s) or an empty string if the dialog
+     * was cancelled or if there is an unnamed selection of files and/or folders
+     */
+    public String getDomainName() {
+    	return curDomainName;
+    }
 
     /**
      * Creates a warning message dialog with the specified message.
@@ -375,7 +380,7 @@ public class MFDomainDialog extends JDialog implements ActionListener,
                             MultipleFileDomains.getInstance()
                                                .addDomain(tmp, searchDirs,
                                 searchPaths);
-
+                            option = tmp;
                             break;
                         }
                     }
@@ -385,6 +390,7 @@ public class MFDomainDialog extends JDialog implements ActionListener,
                 MultipleFileDomains.getInstance()
                                    .addDomain(option, searchDirs, searchPaths);
             }
+            curDomainName = option;
             
             Preferences.set("LastUsedMFSearchDomain", option, null, false, false);
         }
@@ -523,6 +529,7 @@ public class MFDomainDialog extends JDialog implements ActionListener,
             // pass the lists or create copies?
             searchDirs = dirs;
             searchPaths = paths;
+            curDomainName = domainName;
             Preferences.set("LastUsedMFSearchDomain", domainName, null, false, false);
             // close the dialog
             setVisible(false);
@@ -548,22 +555,18 @@ public class MFDomainDialog extends JDialog implements ActionListener,
 
         List<String> allPaths = new ArrayList<String>();
         List<String> allDirs = new ArrayList<String>();
-        List<String> dir;
-        List<String> path;
-        String name;
-        String elem;
-        Map<String, List<String>> domain = null;
+        StringBuilder domainSb = new StringBuilder();
 
         for (int i = 0; i < domainNames.length; i++) {
-            name = (String) domainNames[i];
-            domain = MultipleFileDomains.getInstance().getDomain(name);
+            String name = (String) domainNames[i];
+            Map<String, List<String>> domain = MultipleFileDomains.getInstance().getDomain(name);
 
             if (domain != null) {
-                dir = domain.get(name + MultipleFileDomains.DIR_SUF);
+            	List<String> dir = domain.get(name + MultipleFileDomains.DIR_SUF);
 
                 if (dir != null) {
                     for (int j = 0; j < dir.size(); j++) {
-                        elem = dir.get(j);
+                        String elem = dir.get(j);
 
                         if (!allDirs.contains(elem)) {
                             allDirs.add(elem);
@@ -571,22 +574,27 @@ public class MFDomainDialog extends JDialog implements ActionListener,
                     }
                 }
 
-                path = domain.get(name + MultipleFileDomains.PATH_SUF);
+                List<String> path = domain.get(name + MultipleFileDomains.PATH_SUF);
 
                 if (path != null) {
                     for (int j = 0; j < path.size(); j++) {
-                        elem = path.get(j);
+                        String elem = path.get(j);
 
                         if (!allPaths.contains(elem)) {
                             allPaths.add(elem);
                         }
                     }
                 }
+                domainSb.append(name);
+                if (i < domainNames.length - 1) {
+                	domainSb.append(',');
+                }
             }
         }
 
         searchDirs = allDirs;
         searchPaths = allPaths;
+        curDomainName = domainSb.toString();
         // close the dialog
         setVisible(false);
         dispose();

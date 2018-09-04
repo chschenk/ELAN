@@ -59,6 +59,7 @@ import javax.swing.table.TableCellRenderer;
  * @author Han Sloetjes
  * @version 1.0
  */
+@SuppressWarnings("serial")
 public class ImportCSVDialog extends ClosableDialog implements ClientLogger,
     ActionListener, ChangeListener, ItemListener {
     private File csvFile;
@@ -356,7 +357,7 @@ public class ImportCSVDialog extends ClosableDialog implements ClientLogger,
 
         delimiterCombo = new JComboBox(new String[] {
                     ElanLocale.getString("ImportDialog.CSV.Label.Delimiter.Tab"),
-                    ";", ":", ","
+                    ";", ":", ",", "|"
                 });
         delimiterCombo.setEnabled(false);
         gbc.gridx = 1;

@@ -4,7 +4,7 @@
 	<!-- this project -->
 	<groupId>nl.mpi</groupId>
 	<artifactId>elan</artifactId>
-	<version>5.2</version>
+	<version>5.3</version>
 	<packaging>jar</packaging>
 	<name>ELAN Multimedia Annotator</name>
 	<organization>
@@ -125,7 +125,7 @@
 		<dependency>
 			<groupId>nl.mpi.annot.search</groupId>
 			<artifactId>mfsearch</artifactId>
-			<version>1.5.6</version>
+			<version>1.5.7</version>
 			<exclusions>
         		<exclusion>
       				<groupId>nl.mpi</groupId>

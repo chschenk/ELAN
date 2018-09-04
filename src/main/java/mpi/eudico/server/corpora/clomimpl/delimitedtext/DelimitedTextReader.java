@@ -25,7 +25,9 @@ import java.util.regex.Pattern;
 public class DelimitedTextReader implements ServerLogger {
     private final String TAB = "\t";
     private final String SC = ";";
+    private final String COLON = ":";
     private final String COMMA = ",";
+    private final String PIPE = "\\|";// escaped pipe character \u007c
     private File sourceFile;
     private String delimiter = TAB;
     private int numColumns = 1;
@@ -101,7 +103,7 @@ public class DelimitedTextReader implements ServerLogger {
      *
      * @throws IOException io exception
      */
-    public String detectDelimiter() throws IOException {
+    private String detectDelimiterPr() throws IOException {
         if (sourceFile == null) {
             throw new IOException("No source file specified");
         }
@@ -113,9 +115,10 @@ public class DelimitedTextReader implements ServerLogger {
         BufferedReader bufRead = new BufferedReader(fileReader);
         int maxNumLines = 10;
         int numLines = 0;
-        int numTabs = 0;
-        int numCommas = 0;
-        int numSemiCol = 0;
+        
+        String[] valArray = new String[]{TAB, SC, COLON, COMMA, PIPE};
+        int[] counts = new int[valArray.length];
+        
         String line = null;
         Pattern pat = null;
 
@@ -127,11 +130,19 @@ public class DelimitedTextReader implements ServerLogger {
 
             numLines++;
             pat = Pattern.compile(TAB);
-            numTabs += pat.split(line).length - 1;
+            counts[0] += pat.split(line).length - 1;
+            
             pat = Pattern.compile(SC);
-            numSemiCol += pat.split(line).length - 1;
+            counts[1] += pat.split(line).length - 1;
+            
+            pat = Pattern.compile(COLON);
+            counts[2] += pat.split(line).length - 1;
+            
             pat = Pattern.compile(COMMA);
-            numCommas += pat.split(line).length - 1;
+            counts[3] += pat.split(line).length - 1;
+            
+            pat = Pattern.compile(PIPE);
+            counts[4] += pat.split(line).length - 1;
         }
 
         try {
@@ -140,14 +151,17 @@ public class DelimitedTextReader implements ServerLogger {
         }
 
         String del = null;
-
-        if ((numTabs > numSemiCol) && (numTabs > numCommas)) {
-            del = TAB;
-        } else if ((numSemiCol > numTabs) && (numSemiCol > numCommas)) {
-            del = SC;
-        } else if ((numCommas > numTabs) && (numCommas > numSemiCol)) {
-            del = COMMA;
+        int maxCount = 0;
+        int maxIndex = 0;
+        
+        for (int i = 0; i < counts.length; i++) {
+        	if (counts[i] > maxCount) {
+        		maxCount = counts[i];
+        		maxIndex = i;
+        	}
         }
+
+        del = valArray[maxIndex];
 
         if (del == null) {
             del = TAB;
@@ -156,6 +170,22 @@ public class DelimitedTextReader implements ServerLogger {
         delimiter = del;
 
         return del;
+    }
+    
+    /**
+     * Calls the private implementation and strips the escape character of the 
+     * delimiter in case it is the vertical bar or pipe character.
+     * 
+     * @return the detected delimiter, TAB by default
+     * @throws IOException any io exception
+     */
+    public String detectDelimiter() throws IOException {
+    	String del = detectDelimiterPr();
+    	if (PIPE.equals(del)) {
+    		return "|";
+    	}
+    	
+    	return del;
     }
 
     /**
@@ -225,6 +255,9 @@ public class DelimitedTextReader implements ServerLogger {
     public void setDelimiter(String delimiter) {
         if (delimiter != null) {
             this.delimiter = delimiter;
+            if (delimiter.equals("|")) {
+            	this.delimiter = PIPE;
+            }
         }
     }
 

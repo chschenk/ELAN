@@ -3,11 +3,16 @@ package mpi.eudico.client.annotator.search.model;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
+import java.util.List;
+import java.util.logging.Level;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import mpi.eudico.client.annotator.ElanLocale;
+import static mpi.eudico.client.annotator.util.ClientLogger.LOG;
 import mpi.search.content.query.model.AnchorConstraint;
 import mpi.search.content.query.model.ContentQuery;
 import mpi.search.model.ProgressListener;
@@ -19,7 +24,7 @@ import org.xml.sax.SAXException;
 
 
 /**
- * $Id: EAFMultipleFileSearchEngine.java 46379 2018-01-31 16:04:03Z hasloe $
+ * $Id: EAFMultipleFileSearchEngine.java 46442 2018-04-19 09:27:35Z hasloe $
  * 
  * @version Jan 2018 replaced File as the input for SAXParser by FileInputSource 
  * (because of problems with diacritical marks in file paths)
@@ -30,7 +35,7 @@ public class EAFMultipleFileSearchEngine implements SearchEngine {
     /**
      * Creates a new EAFMultipleFileSearchEngine object.
      *
-     * @param progressListener DOCUMENT ME!
+     * @param progressListener monitor of progress
      */
     public EAFMultipleFileSearchEngine(ProgressListener progressListener) {
         this.progressListener = progressListener;
@@ -39,12 +44,12 @@ public class EAFMultipleFileSearchEngine implements SearchEngine {
     /**
      *
      *
-     * @param regex DOCUMENT ME!
-     * @param files DOCUMENT ME!
+     * @param regex the regular exception
+     * @param files the files to search
      *
-     * @return DOCUMENT ME!
+     * @return a ContentQuery object containing query string and the files
      *
-     * @throws Exception DOCUMENT ME!
+     * @throws Exception any exception
      */
     public static ContentQuery createQuery(String regex, File[] files)
         throws Exception {
@@ -56,11 +61,11 @@ public class EAFMultipleFileSearchEngine implements SearchEngine {
     }
 
     /**
-     * DOCUMENT ME!
+     * Executes the query in all files that are part of the ContentQuery
      *
-     * @param query
+     * @param query contains the content query and the files to search
      *
-     * @throws Exception DOCUMENT ME!
+     * @throws Exception exceptions are caught and packed in one ParseException
      */
     public void executeThread(ContentQuery query) throws Exception {
         EAFMultipleFileSearchHandler handler = new EAFMultipleFileSearchHandler(query);
@@ -69,7 +74,7 @@ public class EAFMultipleFileSearchEngine implements SearchEngine {
         factory.setNamespaceAware(false);
 
         File[] files = query.getFiles();
-
+        List<File> failedFiles = new ArrayList<File>();
         try {
         	SAXParser saxParser = factory.newSAXParser();
         	
@@ -84,12 +89,14 @@ public class EAFMultipleFileSearchEngine implements SearchEngine {
     				InputSource source = new InputSource(fis);
     				saxParser.parse(source, handler);
                 } catch (SAXException e) {
-                    throw new SAXException(file.toString() + ":\n" +
-                        e.getMessage());
+//                    throw new SAXException(file.toString() + ":\n" +
+//                        e.getMessage());
+                	failedFiles.add(file);
                 } catch (IOException e) {
-    	            System.out.println("IO error: " + e.getMessage());
-    	            throw new SAXException(file.toString() + ":\n" +
-                            e.getMessage());
+//    	            System.out.println("IO error: " + e.getMessage());
+//    	            throw new SAXException(file.toString() + ":\n" +
+//                            e.getMessage());
+                	failedFiles.add(file);
     	        } finally {
     				try {
     					if (fis != null) {
@@ -108,15 +115,32 @@ public class EAFMultipleFileSearchEngine implements SearchEngine {
         // (will be ignored since it has no further consequences)
         catch (ConcurrentModificationException e) {
         }
+        
+        if (!failedFiles.isEmpty()) {
+        	StringBuilder sb = new StringBuilder(ElanLocale.getString("MultipleFileSearch.Message.ParseErrors"));
+        	sb.append("\n");
+        	int max = 6;
+        	for (int i = 0; i < failedFiles.size() && i < max; i++) {
+        		sb.append(failedFiles.get(i).getName());
+        		sb.append("\n");
+        	}
+        	if (failedFiles.size() > max) {
+        		sb.append("... + " + (failedFiles.size() - max));
+        	}
+        	if (LOG.isLoggable(Level.WARNING)) {
+        		LOG.warning(sb.toString());
+        	}
+        	throw new SAXException(sb.toString());
+        }
     }
 
 
     /**
      *
      *
-     * @param query DOCUMENT ME!
+     * @param query the content query
      *
-     * @throws Exception DOCUMENT ME!
+     * @throws Exception any exception
      */
     @Override
 	public void performSearch(Query query) throws Exception {

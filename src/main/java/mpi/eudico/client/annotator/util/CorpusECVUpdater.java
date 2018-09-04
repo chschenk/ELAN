@@ -51,9 +51,9 @@ public class CorpusECVUpdater {
 	/** the object to report to */
 	private ProcessReporter reporter = null;
 	
-	/** whether walk recursively through the inputfolder.
+	/** whether walk recursively through the input folder.
 	 * Default is true for backward compatibility. */
-	Boolean recursive = true;
+	private Boolean recursive = true;
 	
 	/** the object to update progress to */
 	private ProgressListener progressListerner;
@@ -61,6 +61,11 @@ public class CorpusECVUpdater {
 	/** */
 	private Boolean canceled = false;
 	private Map<String, Integer> unknownAnnotations;
+	
+	/** a flag that determines whether an annotation value has to be updated based on 
+	 * the annotation's reference to a CVEntry (the default behavior) or the 
+	 * reference has to be removed or updated based on the annotation value */
+	private boolean annotationValuePrecedence = false;
 
 	/**
 	 * Constructor.
@@ -213,7 +218,7 @@ public class CorpusECVUpdater {
 	 * and then delegates to an appropriate method.
 	 * 
 	 * @param file a folder or a file
-	 * @param rootFolder whether this is the rootfolder for processing. Necessary if no recursion is wanted.
+	 * @param rootFolder whether this is the root folder for processing. Necessary if no recursion is wanted.
 	 */
 	private void processFileOrDirectory(File file, Boolean rootFolder) {
 		if (file.isDirectory() && (recursive || rootFolder)) {
@@ -394,7 +399,8 @@ public class CorpusECVUpdater {
 			}
 			int tierLangIndex = pair.getSecond();
 			
-			// Is there a CV?
+			// Is there a CV? The following code is already performed in tier.getEffectiveLanguage()
+			// so could do ControlledVocabulary cv = pair.getFirst();
 			LinguisticType lt = tier.getLinguisticType();
 			String cvname = lt.getControlledVocabularyName();
 			if (cvname == null || cvname.isEmpty()) {
@@ -447,8 +453,37 @@ public class CorpusECVUpdater {
 								registerUnknownAnnotation(currentAnn.getValue());
 							}
 						}
-					} else {
-					
+					} else if (annotationValuePrecedence) {
+						if (!currentAnn.getValue().isEmpty()) {
+							CVEntry cvEntry = ecv.getEntryWithValue(langIndex, currentAnn.getValue());
+							if (cvEntry != null) {
+								if (!cvEntryRefId.equals(cvEntry.getId())) {
+									logMessage("TIER: " + tier.getName()
+										+ " - ANNOTATION_ID: " + currentAnn.getId()
+										+ " - ANNOTATION_VALUE: " + currentAnn.getValue()
+										+ " !! CVE_REF updated: " + cvEntryRefId
+										+ " => " + cvEntry.getId());
+									currentAnn.setCVEntryId(cvEntry.getId());
+									t.setChanged();
+								} // else annotation value and cv entry idref are consistent
+							} else {
+								// There's no entry with the same value as the annotation,
+								// so remove the CV Entry ID from the annotation
+								logMessage("TIER: " + tier.getName()
+									+ " - ANNOTATION_ID: " + currentAnn.getId()
+									+ " - ANNOTATION_VALUE: " + currentAnn.getValue()
+									+ " !! CVE_REF removed: " + cvEntryRefId);
+								currentAnn.setCVEntryId(null);
+								t.setChanged();
+								// and register as "unknown annotation"
+								logMessage("TIER: " + tier.getName()
+								+ " - ANNOTATION_ID: " + currentAnn.getId()
+								+ " - ANNOTATION_VALUE: " + currentAnn.getValue()
+								+ " !! Annotation not in ECV");
+								registerUnknownAnnotation(currentAnn.getValue());
+							}
+						}
+					} else {				
 						CVEntry entry = ecv.getEntrybyId(cvEntryRefId);
 						String value;
 						if (entry != null && 
@@ -481,7 +516,7 @@ public class CorpusECVUpdater {
 	 * @param msg a string describing the change
 	 */
 	private void logMessage(String msg) {
-		// TODO Do something more clever with this infomation
+		// TODO Do something more clever with this information
 		if(reporter == null) {
 			System.out.println(msg);
 		} else {
@@ -507,6 +542,27 @@ public class CorpusECVUpdater {
 	
 	public void cancel() {
 		canceled = true;
+	}
+	
+	/**
+	 * @return true if annotation values are never to be changed but only
+	 * the reference to a CVEntry will be updated or removed
+	 */
+	public boolean isAnnotationValuePrecedence() {
+		return annotationValuePrecedence;
+	}
+	
+	/**
+	 * Sets the flag that determines whether the current annotation value should
+	 * take precedence in case of conflicting annotation value and CVEntry idref.
+	 * 
+	 * The default behavior is that an annotation value is updated if there is
+	 * a reference to an CVEntry and that entry has a different value.
+	 *  
+	 * @param annotationValuePrecedence the new value for this flag
+	 */
+	public void setAnnotationValuePrecedence(boolean annotationValuePrecedence) {
+		this.annotationValuePrecedence = annotationValuePrecedence;
 	}
 	
 	/**
