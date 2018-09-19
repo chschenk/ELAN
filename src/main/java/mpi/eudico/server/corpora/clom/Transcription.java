@@ -41,6 +41,11 @@ public interface Transcription extends ACMEditableObject, ACMEditableDocument {
 	public void setName(String theName);
 	
 	/**
+	 * Deletes the lock
+	 */
+	public void unlock();
+	
+	/**
 	 * Returns the full path as a url.
 	 * 
 	 * @version Dec 2012 this method used to be part of the LanguageResource interface
