@@ -1,11 +1,11 @@
 package mpi.eudico.server.corpora.clomimpl.abstr;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException; 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.*;
-import java.nio.charset.Charset;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -2473,12 +2473,14 @@ public class TranscriptionImpl implements Transcription {
 	private void lock() throws IOException
 	{
 		System.out.println(String.format("Creating lock with filename %s", this.lockFileName));
-		Path lockFilePath = Paths.get(this.lockFileName);
+		BufferedWriter bw = new BufferedWriter(new FileWriter(this.lockFileName));
 		java.net.InetAddress localMachine = java.net.InetAddress.getLocalHost();
-		List<String> lockInfo = new ArrayList<String>();
-		lockInfo.add(Long.toString(System.currentTimeMillis() / 1000L));
-		lockInfo.add(System.getProperty("user.name"));
-		lockInfo.add(localMachine.getHostName());
-		Files.write(lockFilePath, lockInfo, Charset.forName("ASCII"), StandardOpenOption.CREATE_NEW);
+		bw.write(Long.toString(System.currentTimeMillis() / 1000L));
+		bw.newLine();
+		bw.write(System.getProperty("user.name"));
+		bw.newLine();
+		bw.write(localMachine.getHostName());
+		bw.newLine();
+		bw.close();
 	}
 }
